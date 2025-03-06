@@ -115,6 +115,10 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
         }
 
         .block-dropdown {
@@ -126,6 +130,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        
+        .block {
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            position: relative;
+            flex-wrap: wrap;
+            word-break: keep-all;
         }
 
         .block-end {
@@ -808,10 +828,7 @@
         
         <div class="property">
             <label class="property-label">Direction</label>
-            <input type="number" class="property-input" id="sprite-direction" value="90">
-            <div class="rotation-picker">
-                <div class="rotation-handle"></div>
-            </div>
+            <input type="number" class="property-input" id="sprite-direction" value="90" min="0" max="359">
         </div>
         
         <div class="property">
@@ -1109,9 +1126,7 @@
             document.getElementById('sprite-direction').value = sprite.direction;
             document.getElementById('sprite-rotation-style').value = sprite.rotationStyle;
             
-            // Update rotation handle
-            const handle = document.querySelector('.rotation-handle');
-            handle.style.transform = `translateX(-50%) rotate(${sprite.direction - 90}deg)`;
+            // No need to update rotation handle anymore
             
             // Update preview canvas
             updatePreviewCanvas();
@@ -1169,44 +1184,16 @@
             updatePreviewCanvas();
         });
         
-        // Rotation picker functionality
-        const rotationPicker = document.querySelector('.rotation-picker');
-        let isDraggingRotation = false;
-        
-        rotationPicker.addEventListener('mousedown', (e) => {
-            isDraggingRotation = true;
-            updateRotation(e);
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (isDraggingRotation) {
-                updateRotation(e);
-            }
-        });
-        
-        document.addEventListener('mouseup', () => {
-            isDraggingRotation = false;
-        });
-        
-        function updateRotation(e) {
-            const rect = rotationPicker.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            const deltaX = e.clientX - centerX;
-            const deltaY = e.clientY - centerY;
-            
-            let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+        // Direction input functionality
+        document.getElementById('sprite-direction').addEventListener('input', function() {
+            let angle = Number(this.value) % 360;
             if (angle < 0) angle += 360;
             
             sprites[activeSprite].direction = angle;
-            document.getElementById('sprite-direction').value = Math.round(angle);
-            
-            const handle = document.querySelector('.rotation-handle');
-            handle.style.transform = `translateX(-50%) rotate(${angle - 90}deg)`;
+            this.value = angle;
             
             updatePreviewCanvas();
-        }
+        });
         
         // Menu button functionality
         document.querySelectorAll('.menu button').forEach(button => {
@@ -1977,7 +1964,7 @@
             updatePreviewCanvas();
         }
         
-        // Update the preview canvas
+        // Update the preview canvas to show all sprites
         function updatePreviewCanvas() {
             const canvas = document.getElementById('preview-canvas');
             const ctx = canvas.getContext('2d');
@@ -1986,45 +1973,55 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw the current active sprite
-            const sprite = sprites[activeSprite];
-            
-            // Calculate position (center of canvas)
-            const x = canvas.width / 2;
-            const y = canvas.height / 2;
-            
-            // Calculate size
-            const size = 40 * (sprite.size / 100);
-            
-            // Save context for rotation
-            ctx.save();
-            ctx.translate(x, y);
-            
-            // Apply rotation based on rotation style
-            if (sprite.rotationStyle === 'all-around') {
-                ctx.rotate((sprite.direction - 90) * Math.PI / 180);
-            } else if (sprite.rotationStyle === 'left-right') {
-                // Flip horizontally if facing left
-                if (sprite.direction > 180 && sprite.direction < 360) {
-                    ctx.scale(-1, 1);
+            // Draw all sprites
+            Object.keys(sprites).forEach(spriteName => {
+                const sprite = sprites[spriteName];
+                if (sprite.visible) {
+                    // Calculate position (center of canvas + sprite coordinates)
+                    const x = canvas.width / 2 + sprite.x;
+                    const y = canvas.height / 2 - sprite.y; // Y is inverted in canvas
+                    
+                    // Calculate size
+                    const size = 20 * (sprite.size / 100);
+                    
+                    // Save context for rotation
+                    ctx.save();
+                    ctx.translate(x, y);
+                    
+                    // Apply rotation based on rotation style
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.rotate((sprite.direction - 90) * Math.PI / 180);
+                    } else if (sprite.rotationStyle === 'left-right') {
+                        // Flip horizontally if facing left
+                        if (sprite.direction > 180 && sprite.direction < 360) {
+                            ctx.scale(-1, 1);
+                        }
+                    }
+                    
+                    // Draw sprite
+                    ctx.fillStyle = getColorForSprite(spriteName);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw direction indicator
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                    
+                    // Add highlight for active sprite
+                    if (spriteName === activeSprite) {
+                        ctx.strokeStyle = 'var(--accent-color)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x - size - 5, y - size - 5, (size + 5) * 2, (size + 5) * 2);
+                    }
                 }
-            }
-            
-            // Draw sprite
-            ctx.fillStyle = getColorForSprite(activeSprite);
-            ctx.beginPath();
-            ctx.arc(0, 0, size, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Draw direction indicator
-            if (sprite.rotationStyle === 'all-around') {
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            ctx.restore();
+            });
         }
         
         // Get a color for a sprite based on its name
