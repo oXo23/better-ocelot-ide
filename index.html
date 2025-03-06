@@ -971,99 +971,193 @@
 
     <script>
         // Block definitions array
-        const blocks = [
-            // Motion blocks
-            {block: "Move {steps=number} steps", code: "sprite.x += {steps} * Math.cos(sprite.direction * (Math.PI / 180)); sprite.y += {steps} * Math.sin(sprite.direction * (Math.PI / 180));", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Turn right {degrees=number} degrees", code: "sprite.direction = (sprite.direction + {degrees}) % 360;", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Turn left {degrees=number} degrees", code: "sprite.direction = (sprite.direction - {degrees} + 360) % 360;", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Go to x: {x=number} y: {y=number}", code: "sprite.x = {x}; sprite.y = {y};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Glide {seconds=number} secs to x: {x=number} y: {y=number}", code: "// Animation code would go here", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Point in direction {direction=number}", code: "sprite.direction = {direction};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Point towards {target=dropdown}", code: "// Calculate angle towards target", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Change x by {amount=number}", code: "sprite.x += {amount};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Set x to {value=number}", code: "sprite.x = {value};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Change y by {amount=number}", code: "sprite.y += {amount};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Set y to {value=number}", code: "sprite.y = {value};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "If on edge, bounce", code: "// Edge detection code", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "Set rotation style {style=dropdown}", code: "sprite.rotationStyle = {style};", type: "no_code_section", is_input: false, category: "motion"},
-            {block: "X position", code: "sprite.x", type: "no_code_section", is_input: true, category: "motion"},
-            {block: "Y position", code: "sprite.y", type: "no_code_section", is_input: true, category: "motion"},
-            {block: "Direction", code: "sprite.direction", type: "no_code_section", is_input: true, category: "motion"},
-            
-            // Looks blocks
-            {block: "Say {message=string}", code: "displayMessage(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Say {message=string} for {seconds=number} seconds", code: "displayMessage(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Think {message=string}", code: "displayThought(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Think {message=string} for {seconds=number} seconds", code: "displayThought(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Switch costume to {costume=dropdown}", code: "sprite.activeCostume = {costume};", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Next costume", code: "// Cycle to next costume", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Switch backdrop to {backdrop=dropdown}", code: "// Switch backdrop code", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Next backdrop", code: "// Next backdrop code", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Change size by {amount=number}", code: "sprite.size += {amount}; if (sprite.size < 1) sprite.size = 1;", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Set size to {size=number}%", code: "sprite.size = {size}; if (sprite.size < 1) sprite.size = 1;", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Show", code: "sprite.visible = true;", type: "no_code_section", is_input: false, category: "looks"},
-            {block: "Hide", code: "sprite.visible = false;", type: "no_code_section", is_input: false, category: "looks"},
-            
-            // Events blocks
-            {block: "When flag clicked", code: "// Flag clicked event", type: "event", is_input: false, category: "events"},
-            {block: "When {key=key} key pressed", code: "// Key pressed event", type: "event", is_input: false, category: "events"},
-            {block: "When this sprite clicked", code: "// Sprite clicked event", type: "event", is_input: false, category: "events"},
-            {block: "When backdrop switches to {backdrop=dropdown}", code: "// Backdrop changed event", type: "event", is_input: false, category: "events"},
-            {block: "When {condition=dropdown} > {value=number}", code: "// Condition event", type: "event", is_input: false, category: "events"},
-            {block: "When I receive {message=dropdown}", code: "// Message received event", type: "event", is_input: false, category: "events"},
-            {block: "Broadcast {message=dropdown}", code: "broadcastMessage({message});", type: "no_code_section", is_input: false, category: "events"},
-            {block: "Broadcast {message=dropdown} and wait", code: "broadcastMessageAndWait({message});", type: "no_code_section", is_input: false, category: "events"},
-            
-            // Control blocks
-            {block: "Wait {seconds=number} seconds", code: "await wait({seconds});", type: "no_code_section", is_input: false, category: "control"},
-            {block: "Repeat {times=number}", code: "for (let i = 0; i < {times}; i++) {", type: "code_section", is_input: false, category: "control"},
-            {block: "End repeat", code: "}", type: "end", is_input: false, category: "control"},
-            {block: "Forever", code: "while (true) {", type: "code_section", is_input: false, category: "control"},
-            {block: "End forever", code: "}", type: "end", is_input: false, category: "control"},
-            {block: "If {condition=boolean} then", code: "if ({condition}) {", type: "code_section", is_input: false, category: "control"},
-            {block: "End if", code: "}", type: "end", is_input: false, category: "control"},
-            {block: "If {condition=boolean} then", code: "if ({condition}) {", type: "code_section_with_else", is_input: false, category: "control"},
-            {block: "Else", code: "} else {", type: "else", is_input: false, category: "control"},
-            {block: "End if else", code: "}", type: "end", is_input: false, category: "control"},
-            {block: "Wait until {condition=boolean}", code: "await waitUntil(() => {condition});", type: "no_code_section", is_input: false, category: "control"},
-            {block: "Repeat until {condition=boolean}", code: "while (!({condition})) {", type: "code_section", is_input: false, category: "control"},
-            {block: "End repeat until", code: "}", type: "end", is_input: false, category: "control"},
-            {block: "Stop {target=dropdown}", code: "stop({target});", type: "no_code_section", is_input: false, category: "control"},
-            
-            // Operators blocks
-            {block: "{a=number} + {b=number}", code: "({a} + {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=number} - {b=number}", code: "({a} - {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=number} * {b=number}", code: "({a} * {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=number} / {b=number}", code: "({a} / {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "Pick random {min=number} to {max=number}", code: "Math.floor(Math.random() * ({max} - {min} + 1) + {min})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=boolean} < {b=boolean}", code: "({a} < {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=boolean} = {b=boolean}", code: "({a} === {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=boolean} > {b=boolean}", code: "({a} > {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=boolean} and {b=boolean}", code: "({a} && {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "{a=boolean} or {b=boolean}", code: "({a} || {b})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "not {bool=boolean}", code: "(!{bool})", type: "no_code_section", is_input: true, category: "operators"},
-            {block: "join {a=string} {b=string}", code: "({a} + {b})", type: "no_code_section", is_input: true, category: "operators"},
-            
-            // Variables blocks
-            {block: "Set {var=variable} to {value=any}", code: "variables[{var}] = {value};", type: "no_code_section", is_input: false, category: "variables"},
-            {block: "Change {var=variable} by {amount=number}", code: "variables[{var}] += {amount};", type: "no_code_section", is_input: false, category: "variables"},
-            {block: "Show variable {var=variable}", code: "showVariable({var});", type: "no_code_section", is_input: false, category: "variables"},
-            {block: "Hide variable {var=variable}", code: "hideVariable({var});", type: "no_code_section", is_input: false, category: "variables"},
-            {block: "{var=variable}", code: "variables[{var}]", type: "no_code_section", is_input: true, category: "variables"},
-            
-            // Sound blocks
-            {block: "Play sound {sound=dropdown}", code: "playSound(sprite, {sound});", type: "no_code_section", is_input: false, category: "sound"},
-            {block: "Play sound {sound=dropdown} until done", code: "await playSoundUntilDone(sprite, {sound});", type: "no_code_section", is_input: false, category: "sound"},
-            {block: "Stop all sounds", code: "stopAllSounds();", type: "no_code_section", is_input: false, category: "sound"},
-            
-            // Sensing blocks
-            {block: "Touching {target=dropdown}?", code: "isTouching(sprite, {target})", type: "no_code_section", is_input: true, category: "sensing"},
-            {block: "Touching color {color=color}?", code: "isTouchingColor(sprite, {color})", type: "no_code_section", is_input: true, category: "sensing"},
-            {block: "Key {key=key} pressed?", code: "isKeyPressed({key})", type: "no_code_section", is_input: true, category: "sensing"},
-            {block: "Mouse down?", code: "isMouseDown()", type: "no_code_section", is_input: true, category: "sensing"},
-            {block: "Mouse x", code: "getMouseX()", type: "no_code_section", is_input: true, category: "sensing"},
-            {block: "Mouse y", code: "getMouseY()", type: "no_code_section", is_input: true, category: "sensing"}
-        ];
+    const blocks = [
+        // Motion blocks
+        {block: "Move {steps=number} steps", code: "sprite.x += {steps} * Math.cos(sprite.direction * (Math.PI / 180)); sprite.y += {steps} * Math.sin(sprite.direction * (Math.PI / 180));", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Turn right {degrees=number} degrees", code: "sprite.direction = (sprite.direction + {degrees}) % 360;", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Turn left {degrees=number} degrees", code: "sprite.direction = (sprite.direction - {degrees} + 360) % 360;", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Go to x: {x=number} y: {y=number}", code: "sprite.x = {x}; sprite.y = {y};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Glide {seconds=number} secs to x: {x=number} y: {y=number}", code: "glideTo(sprite, {x}, {y}, {seconds});", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Point in direction {direction=number}", code: "sprite.direction = {direction};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Point towards {target=dropdown}", code: "pointTowards(sprite, {target});", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Change x by {amount=number}", code: "sprite.x += {amount};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Set x to {value=number}", code: "sprite.x = {value};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Change y by {amount=number}", code: "sprite.y += {amount};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Set y to {value=number}", code: "sprite.y = {value};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "If on edge, bounce", code: "bounceIfOnEdge(sprite);", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "Set rotation style {style=dropdown}", code: "sprite.rotationStyle = {style};", type: "no_code_section", is_input: false, category: "motion"},
+        {block: "X position", code: "sprite.x", type: "no_code_section", is_input: true, category: "motion"},
+        {block: "Y position", code: "sprite.y", type: "no_code_section", is_input: true, category: "motion"},
+        {block: "Direction", code: "sprite.direction", type: "no_code_section", is_input: true, category: "motion"},
+        
+        // Looks blocks
+        {block: "Say {message=string}", code: "displayMessage(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Say {message=string} for {seconds=number} seconds", code: "displayMessage(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Think {message=string}", code: "displayThought(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Think {message=string} for {seconds=number} seconds", code: "displayThought(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Switch costume to {costume=dropdown}", code: "sprite.activeCostume = {costume};", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Next costume", code: "nextCostume(sprite);", type: "no_code_section", is_input: false, category: "looks"},
+        {block: "Switch backdrop to {backdrop=dropdown}", code: "switchBackdrop({backdrop});", type: "no_code_section", is_input: false, category: "looks"},
+        
+        // Sound blocks
+        {block: "Play sound {sound=dropdown}", code: "playSound({sound});", type: "no_code_section", is_input: false, category: "sound"},
+        {block: "Play sound {sound=dropdown} until done", code: "playSoundUntilDone({sound});", type: "no_code_section", is_input: false, category: "sound"},
+        {block: "Stop all sounds", code: "stopAllSounds();", type: "no_code_section", is_input: false, category: "sound"},
+        {block: "Change volume by {amount=number}", code: "sprite.volume += {amount};", type: "no_code_section", is_input: false, category: "sound"},
+        {block: "Set volume to {amount=number}%", code: "sprite.volume = {amount};", type: "no_code_section", is_input: false, category: "sound"},
+        
+        // Event blocks
+        {block: "When flag clicked", code: "whenFlagClicked();", type: "no_code_section", is_input: false, category: "events"},
+        {block: "When {key=dropdown} key pressed", code: "whenKeyPressed({key});", type: "no_code_section", is_input: false, category: "events"},
+        {block: "When this sprite clicked", code: "whenSpriteClicked(sprite);", type: "no_code_section", is_input: false, category: "events"},
+        {block: "When backdrop switches to {backdrop=dropdown}", code: "whenBackdropSwitchesTo({backdrop});", type: "no_code_section", is_input: false, category: "events"},
+        {block: "When {sensor=dropdown} > {value=number}", code: "whenSensorGreaterThan({sensor}, {value});", type: "no_code_section", is_input: false, category: "events"},
+        {block: "When I receive {message=dropdown}", code: "whenIReceive({message});", type: "no_code_section", is_input: false, category: "events"},
+        {block: "Broadcast {message=dropdown}", code: "broadcast({message});", type: "no_code_section", is_input: false, category: "events"},
+        {block: "Broadcast {message=dropdown} and wait", code: "broadcastAndWait({message});", type: "no_code_section", is_input: false, category: "events"},
+        
+        // Control blocks
+        {block: "Wait {seconds=number} seconds", code: "wait({seconds});", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Repeat {times=number}", code: "repeat({times}, function() { /* code here */ });", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Forever", code: "forever(function() { /* code here */ });", type: "no_code_section", is_input: false, category: "control"},
+        {block: "If {condition=boolean} then", code: "if ({condition}) { /* code here */ }", type: "no_code_section", is_input: false, category: "control"},
+        {block: "If {condition=boolean} then else", code: "if ({condition}) { /* code here */ } else { /* code here */ }", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Wait until {condition=boolean}", code: "waitUntil({condition});", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Repeat until {condition=boolean}", code: "repeatUntil({condition}, function() { /* code here */ });", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Stop {option=dropdown}", code: "stop({option});", type: "no_code_section", is_input: false, category: "control"},
+        {block: "When I start as a clone", code: "whenStartAsClone();", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Create clone of {sprite=dropdown}", code: "createClone({sprite});", type: "no_code_section", is_input: false, category: "control"},
+        {block: "Delete this clone", code: "deleteThisClone();", type: "no_code_section", is_input: false, category: "control"},
+        
+        // Sensing blocks
+        {block: "Touching {object=dropdown}?", code: "isTouching({object});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Touching color {color=color}?", code: "isTouchingColor({color});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Color {color1=color} is touching {color2=color}?", code: "isColorTouching({color1}, {color2});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Distance to {object=dropdown}", code: "distanceTo({object});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Ask {question=string} and wait", code: "askAndWait({question});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Answer", code: "answer();", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Key {key=dropdown} pressed?", code: "isKeyPressed({key});", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Mouse down?", code: "isMouseDown();", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "Mouse x", code: "mouseX();", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Mouse y", code: "mouseY();", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Loudness", code: "loudness();", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Timer", code: "timer();", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Reset timer", code: "resetTimer();", type: "no_code_section", is_input: false, category: "sensing"},
+        {block: "{attribute=dropdown} of {object=dropdown}", code: "attributeOf({attribute}, {object});", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Current {time=dropdown}", code: "currentTime({time});", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Days since 2000", code: "daysSince2000();", type: "no_code_section", is_input: true, category: "sensing"},
+        {block: "Username", code: "username();", type: "no_code_section", is_input: true, category: "sensing"},
+        
+        // Operators blocks
+        {block: "{num1=number} + {num2=number}", code: "{num1} + {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} - {num2=number}", code: "{num1} - {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} * {num2=number}", code: "{num1} * {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} / {num2=number}", code: "{num1} / {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Pick random {from=number} to {to=number}", code: "pickRandom({from}, {to});", type: "no_code_section", is_input: false, category: "operators"},
+        {block: "{num1=number} < {num2=number}", code: "{num1} < {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} = {num2=number}", code: "{num1} == {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} > {num2=number}", code: "{num1} > {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{cond1=boolean} and {cond2=boolean}", code: "{cond1} && {cond2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{cond1=boolean} or {cond2=boolean}", code: "{cond1} || {cond2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "not {cond=boolean}", code: "!{cond}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Join {str1=string} {str2=string}", code: "{str1} + {str2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Letter {index=number} of {str=string}", code: "{str}.charAt({index} - 1)", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Length of {str=string}", code: "{str}.length", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{str=string} contains {substr=string}?", code: "{str}.includes({substr})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "{num1=number} mod {num2=number}", code: "{num1} % {num2}", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Round {num=number}", code: "Math.round({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Abs of {num=number}", code: "Math.abs({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Floor of {num=number}", code: "Math.floor({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Ceiling of {num=number}", code: "Math.ceil({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Sqrt of {num=number}", code: "Math.sqrt({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Sin of {num=number}", code: "Math.sin({num} * (Math.PI / 180))", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Cos of {num=number}", code: "Math.cos({num} * (Math.PI / 180))", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Tan of {num=number}", code: "Math.tan({num} * (Math.PI / 180))", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Asin of {num=number}", code: "Math.asin({num}) * (180 / Math.PI)", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Acos of {num=number}", code: "Math.acos({num}) * (180 / Math.PI)", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Atan of {num=number}", code: "Math.atan({num}) * (180 / Math.PI)", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Ln of {num=number}", code: "Math.log({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "Log of {num=number}", code: "Math.log10({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "e ^ {num=number}", code: "Math.exp({num})", type: "no_code_section", is_input: true, category: "operators"},
+        {block: "10 ^ {num=number}", code: "Math.pow(10, {num})", type: "no_code_section", is_input: true, category: "operators"},
+        // Variables blocks
+        {block: "Set {variable=dropdown} to {value=number}", code: "setVariable({variable}, {value});", type: "no_code_section", is_input: false, category: "variables"},
+        {block: "Change {variable=dropdown} by {amount=number}", code: "changeVariable({variable}, {amount});", type: "no_code_section", is_input: false, category: "variables"},
+        {block: "Show variable {variable=dropdown}", code: "showVariable({variable});", type: "no_code_section", is_input: false, category: "variables"},
+        {block: "Hide variable {variable=dropdown}", code: "hideVariable({variable});", type: "no_code_section", is_input: false, category: "variables"},
+        {block: "{variable=dropdown}", code: "getVariable({variable});", type: "no_code_section", is_input: true, category: "variables"},
+
+        // My Blocks blocks
+        {block: "Define {blockName=string}", code: "defineBlock({blockName});", type: "no_code_section", is_input: false, category: "my-blocks"},
+        {block: "{blockName=string}", code: "executeBlock({blockName});", type: "no_code_section", is_input: false, category: "my-blocks"},
+
+        // Pen blocks
+        {block: "Erase all", code: "eraseAll();", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Stamp", code: "stamp();", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Pen down", code: "penDown();", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Pen up", code: "penUp();", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Set pen color to {color=color}", code: "setPenColor({color});", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Change pen color by {amount=number}", code: "changePenColor({amount});", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Set pen shade to {amount=number}", code: "setPenShade({amount});", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Change pen shade by {amount=number}", code: "changePenShade({amount});", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Set pen size to {size=number}", code: "setPenSize({size});", type: "no_code_section", is_input: false, category: "pen"},
+        {block: "Change pen size by {amount=number}", code: "changePenSize({amount});", type: "no_code_section", is_input: false, category: "pen"}
+    ];
+
+    // Function definitions for the blocks
+    function glideTo(sprite, x, y, secs) {
+        // Glide animation logic
+        const startX = sprite.x;
+        const startY = sprite.y;
+        const deltaX = x - startX;
+        const deltaY = y - startY;
+        const startTime = Date.now();
+        const duration = secs * 1000;
+
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            sprite.x = startX + deltaX * progress;
+            sprite.y = startY + deltaY * progress;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function pointTowards(sprite, target) {
+        // Calculate angle towards target
+        const deltaX = target.x - sprite.x;
+        const deltaY = target.y - sprite.y;
+        sprite.direction = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    }
+
+    function bounceIfOnEdge(sprite) {
+        // Edge detection logic
+        const canvasWidth = 480; // example width
+        const canvasHeight = 360; // example height
+
+        if (sprite.x <= 0 || sprite.x >= canvasWidth) {
+            sprite.direction = 180 - sprite.direction;
+        }
+        if (sprite.y <= 0 || sprite.y >= canvasHeight) {
+            sprite.direction = -sprite.direction;
+        }
+    }
+
+    function nextCostume(sprite) {
+        // Cycle to next costume logic
+        const totalCostumes = sprite.costumes.length;
+        sprite.activeCostume = (sprite.activeCostume + 1) % totalCostumes;
+    }
+
+    function switchBackdrop(backdrop) {
+        // Switch backdrop logic
+        document.body.style.backgroundImage = `url(${backdrop})`;
+    }
+        
         
         // Store sprites and their scripts
         const sprites = {
