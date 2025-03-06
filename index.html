@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,7 +24,7 @@
             --block-pen: #0fbd8c;
             --block-sound: #d65cd6;
         }
-        
+
         body {
             display: grid;
             grid-template-areas:
@@ -104,6 +103,8 @@
             display: flex;
             align-items: center;
             position: relative;
+            flex-wrap: wrap;
+            word-break: keep-all;
         }
 
         .block-input {
@@ -135,7 +136,7 @@
             text-overflow: ellipsis;
             vertical-align: middle;
         }
-        
+
         .block {
             padding: 8px;
             border-radius: 5px;
@@ -509,6 +510,26 @@
         .color-option.active {
             outline: 2px solid white;
         }
+
+        /* Context Menu Styles */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 5px;
+            z-index: 1001; /* Ensure it's above other elements */
+        }
+
+        .context-menu-item {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--block-bg);
+        }
     </style>
 </head>
 <body>
@@ -521,7 +542,7 @@
             <button id="run-button">Run ▶</button>
         </div>
     </div>
-    
+
     <div class="sidebar">
         <div class="category">
             <div class="category-header" style="background-color: var(--block-motion);">Motion</div>
@@ -544,7 +565,7 @@
                 <div class="block motion" draggable="true">Direction</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-looks);">Looks</div>
             <div class="blocks">
@@ -567,7 +588,7 @@
                 <div class="block looks" draggable="true">Go <span class="block-dropdown">forward</span> <span class="block-input">1</span> layers</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-sound);">Sound</div>
             <div class="blocks">
@@ -585,7 +606,7 @@
                 <div class="block sound" draggable="true">Pan left/right</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-events);">Events</div>
             <div class="blocks">
@@ -599,7 +620,7 @@
                 <div class="block events" draggable="true">Broadcast <span class="block-dropdown">message1</span> and wait</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-control);">Control</div>
             <div class="blocks">
@@ -622,7 +643,7 @@
                 <div class="block control" draggable="true">Delete this clone</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-sensing);">Sensing</div>
             <div class="blocks">
@@ -645,7 +666,7 @@
                 <div class="block sensing" draggable="true">Username</div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-operators);">Operators</div>
             <div class="blocks">
@@ -682,7 +703,7 @@
                 <div class="operator-block operators" draggable="true">10 ^ <span class="block-input">2</span></div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-variables);">Variables</div>
             <div class="blocks">
@@ -693,7 +714,7 @@
                 <div class="block variables" draggable="true"><span class="block-dropdown">my variable</span></div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-my-blocks);">My Blocks</div>
             <div class="blocks">
@@ -701,7 +722,7 @@
                 <div class="block my-blocks" draggable="true"><span class="block-input">block name</span></div>
             </div>
         </div>
-        
+
         <div class="category">
             <div class="category-header" style="background-color: var(--block-pen);">Pen</div>
             <div class="blocks">
@@ -719,7 +740,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="main-content">
         <div class="workspace">
             <h3>Code Workspace for <span id="current-sprite-name">Sprite 1</span></h3>
@@ -727,37 +748,37 @@
                 <!-- This is where the sprite-specific blocks will be dropped -->
             </div>
         </div>
-        
+
         <div class="sprite-area">
             <div class="tabs">
                 <div class="tab active" data-tab="sprites">Sprites</div>
                 <div class="tab" data-tab="costumes">Costumes</div>
                 <div class="tab" data-tab="sounds">Sounds</div>
             </div>
-            
+
             <div class="tab-content active" id="sprites-tab">
                 <div class="sprites">
                     <div class="sprite active" data-name="Sprite 1">
                         <canvas width="60" height="60"></canvas>
                         <div>Sprite 1</div>
                     </div>
-                    
+
                     <div class="sprite" data-name="Sprite 2">
                         <canvas width="60" height="60"></canvas>
                         <div>Sprite 2</div>
                     </div>
-                    
+
                     <div class="sprite" data-name="Sprite 3">
                         <canvas width="60" height="60"></canvas>
                         <div>Sprite 3</div>
                     </div>
-                    
+
                     <div class="sprite add-sprite">
                         <div>+</div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="tab-content" id="costumes-tab">
                 <div class="toolbar">
                     <button id="new-costume">New Costume</button>
@@ -775,7 +796,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="tab-content" id="sounds-tab">
                 <div class="toolbar">
                     <button id="new-sound">New Sound</button>
@@ -801,36 +822,36 @@
             </div>
         </div>
     </div>
-    
+
     <div class="property-panel">
         <canvas class="preview-canvas" id="preview-canvas" width="240" height="180"></canvas>
         <h3>Sprite Properties</h3>
-        
+
         <div class="property">
             <label class="property-label">Name</label>
             <input type="text" class="property-input" id="sprite-name" value="Sprite 1">
         </div>
-        
+
         <div class="property">
             <label class="property-label">X Position</label>
             <input type="number" class="property-input" id="sprite-x" value="0">
         </div>
-        
+
         <div class="property">
             <label class="property-label">Y Position</label>
             <input type="number" class="property-input" id="sprite-y" value="0">
         </div>
-        
+
         <div class="property">
             <label class="property-label">Size (%)</label>
             <input type="number" class="property-input" id="sprite-size" value="100">
         </div>
-        
+
         <div class="property">
             <label class="property-label">Direction</label>
             <input type="number" class="property-input" id="sprite-direction" value="90" min="0" max="359">
         </div>
-        
+
         <div class="property">
             <label class="property-label">Rotation Style</label>
             <select class="property-input" id="sprite-rotation-style">
@@ -840,7 +861,7 @@
             </select>
         </div>
     </div>
-    
+
     <div class="footer">Better Ocelot IDE - An improved version of Ocelot IDE by StarSubject</div>
 
     <!-- Canvas for running sprites -->
@@ -851,7 +872,7 @@
             <canvas id="project-canvas" width="480" height="360" style="display: block; margin: 20px auto; background-color: white; border-radius: 5px;"></canvas>
         </div>
     </div>
-    
+
     <!-- About Us Modal -->
     <div id="about-modal" class="editor-modal">
         <div class="editor-content" style="max-width: 600px;">
@@ -876,13 +897,13 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Costume Paint Editor -->
     <div id="paint-editor" class="editor-modal">
         <div class="editor-content">
             <button id="close-paint" class="editor-close">X</button>
             <h2 style="color: var(--accent-color); text-align: center;">Paint Editor</h2>
-            
+
             <div class="painter-tools">
                 <div class="painter-tool active" data-tool="brush">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
@@ -920,9 +941,9 @@
                     </svg>
                 </div>
             </div>
-            
+
             <canvas class="painter-canvas" id="paint-canvas" width="400" height="300"></canvas>
-            
+
             <div class="color-picker">
                 <div class="color-option active" style="background-color: #000000;"></div>
                 <div class="color-option" style="background-color: #ff0000;"></div>
@@ -937,11 +958,19 @@
                 <div class="color-option" style="background-color: #00ff88;"></div>
                 <div class="color-option" style="background-color: #888888;"></div>
             </div>
-            
+
             <div style="text-align: center; margin-top: 15px;">
                 <button id="save-costume" style="background-color: var(--accent-color); border: none; color: white; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Save Costume</button>
             </div>
         </div>
+    </div>
+
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item">Delete</div>
+        <div class="context-menu-item">Duplicate</div>
+        <div class="context-menu-item">Copy</div>
+        <div class="context-menu-item">Paste</div>
+        <div class="context-menu-item">Help</div>
     </div>
 
     <script>
@@ -984,19 +1013,21 @@
                 visible: true
             }
         };
-        
+
         let activeSprite = 'Sprite 1';
         let paintTool = 'brush';
         let paintColor = '#000000';
         let isPainting = false;
         let startX, startY;
-        
+        let clipboardBlock = null; // Variable to store the copied block
+        const contextMenu = document.getElementById('context-menu');
+
         // Initialize canvases for sprites and costumes
         initCanvases();
-        
+
         // Initialize preview canvas
         updatePreviewCanvas();
-        
+
         // Toggle block categories
         document.querySelectorAll('.category-header').forEach(header => {
             header.addEventListener('click', () => {
@@ -1011,14 +1042,14 @@
                 // Deactivate all tabs
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-                
+
                 // Activate clicked tab
                 tab.classList.add('active');
                 const tabName = tab.getAttribute('data-tab');
                 document.getElementById(`${tabName}-tab`).classList.add('active');
             });
         });
-        
+
         // Sprite selection
         document.querySelectorAll('.sprite').forEach(sprite => {
             if (!sprite.classList.contains('add-sprite')) {
@@ -1027,32 +1058,32 @@
                 });
             }
         });
-        
+
         // Add sprite button
         document.querySelector('.add-sprite').addEventListener('click', () => {
             createNewSprite();
         });
-        
+
         function selectSprite(spriteElement) {
             // Update UI
             document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
             spriteElement.classList.add('active');
-            
+
             // Update active sprite
             activeSprite = spriteElement.getAttribute('data-name');
             document.getElementById('current-sprite-name').textContent = activeSprite;
-            
+
             // Load sprite's scripts
             loadSpriteScripts();
-            
+
             // Update sprite properties panel
             updateSpriteProperties();
         }
-        
+
         function createNewSprite() {
             const spriteCount = Object.keys(sprites).length + 1;
             const spriteName = `Sprite ${spriteCount}`;
-            
+
             // Create new sprite data
             sprites[spriteName] = {
                 scripts: [],
@@ -1066,46 +1097,46 @@
                 rotationStyle: 'all-around',
                 visible: true
             };
-            
+
             // Create sprite element
             const newSprite = document.createElement('div');
             newSprite.className = 'sprite';
             newSprite.setAttribute('data-name', spriteName);
-            
+
             const canvas = document.createElement('canvas');
             canvas.width = 60;
             canvas.height = 60;
-            
+
             const label = document.createElement('div');
             label.textContent = spriteName;
-            
+
             newSprite.appendChild(canvas);
             newSprite.appendChild(label);
-            
+
             // Add to DOM before the add button
             const addButton = document.querySelector('.add-sprite');
             addButton.parentNode.insertBefore(newSprite, addButton);
-            
+
             // Initialize sprite's canvas
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = getColorForSprite(spriteName);
             ctx.beginPath();
             ctx.arc(30, 30, 20, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Add click event
             newSprite.addEventListener('click', () => {
                 selectSprite(newSprite);
             });
-            
+
             // Select the new sprite
             selectSprite(newSprite);
         }
-        
+
         function loadSpriteScripts() {
             const dropZone = document.querySelector('.drop-zone');
             dropZone.innerHTML = '';
-            
+
             if (sprites[activeSprite].scripts.length > 0) {
                 sprites[activeSprite].scripts.forEach(scriptHtml => {
                     const scriptElement = document.createElement('div');
@@ -1115,23 +1146,23 @@
                 });
             }
         }
-        
+
         function updateSpriteProperties() {
             const sprite = sprites[activeSprite];
-            
+
             document.getElementById('sprite-name').value = activeSprite;
             document.getElementById('sprite-x').value = sprite.x;
             document.getElementById('sprite-y').value = sprite.y;
             document.getElementById('sprite-size').value = sprite.size;
             document.getElementById('sprite-direction').value = sprite.direction;
             document.getElementById('sprite-rotation-style').value = sprite.rotationStyle;
-            
+
             // No need to update rotation handle anymore
-            
+
             // Update preview canvas
             updatePreviewCanvas();
         }
-        
+
         // Property panel event listeners
         document.getElementById('sprite-name').addEventListener('change', function() {
             const newName = this.value.trim();
@@ -1139,12 +1170,12 @@
                 // Update sprites object
                 sprites[newName] = sprites[activeSprite];
                 delete sprites[activeSprite];
-                
+
                 // Update UI
                 const spriteElement = document.querySelector(`.sprite.active`);
                 spriteElement.setAttribute('data-name', newName);
                 spriteElement.querySelector('div').textContent = newName;
-                
+
                 // Update current sprite reference
                 activeSprite = newName;
                 document.getElementById('current-sprite-name').textContent = newName;
@@ -1152,54 +1183,54 @@
                 this.value = activeSprite; // Reset if invalid
             }
         });
-        
+
         document.getElementById('sprite-x').addEventListener('change', function() {
             sprites[activeSprite].x = Number(this.value);
             updatePreviewCanvas();
         });
-        
+
         document.getElementById('sprite-y').addEventListener('change', function() {
             sprites[activeSprite].y = Number(this.value);
             updatePreviewCanvas();
         });
-        
+
         document.getElementById('sprite-size').addEventListener('change', function() {
             sprites[activeSprite].size = Number(this.value);
             updatePreviewCanvas();
         });
-        
+
         document.getElementById('sprite-direction').addEventListener('change', function() {
             const direction = Number(this.value) % 360;
             sprites[activeSprite].direction = direction;
-            
+
             // Update rotation handle
             const handle = document.querySelector('.rotation-handle');
             handle.style.transform = `translateX(-50%) rotate(${direction - 90}deg)`;
-            
+
             updatePreviewCanvas();
         });
-        
+
         document.getElementById('sprite-rotation-style').addEventListener('change', function() {
             sprites[activeSprite].rotationStyle = this.value;
             updatePreviewCanvas();
         });
-        
+
         // Direction input functionality
         document.getElementById('sprite-direction').addEventListener('input', function() {
             let angle = Number(this.value) % 360;
             if (angle < 0) angle += 360;
-            
+
             sprites[activeSprite].direction = angle;
             this.value = angle;
-            
+
             updatePreviewCanvas();
         });
-        
+
         // Menu button functionality
         document.querySelectorAll('.menu button').forEach(button => {
             button.addEventListener('click', () => {
                 const action = button.textContent.trim();
-                
+
                 if (action === 'Run ▶') {
                     runProject();
                 } else if (action === 'File') {
@@ -1214,7 +1245,7 @@
                 }
             });
         });
-        
+
         // Function to show dropdown menu
         function showDropdown(button, options) {
             // Remove any existing dropdowns
@@ -1222,7 +1253,7 @@
             if (existingDropdown) {
                 existingDropdown.remove();
             }
-            
+
             // Create dropdown
             const dropdown = document.createElement('div');
             dropdown.className = 'dropdown-menu';
@@ -1232,12 +1263,12 @@
             dropdown.style.borderRadius = '4px';
             dropdown.style.padding = '5px 0';
             dropdown.style.zIndex = '100';
-            
+
             // Calculate position
             const rect = button.getBoundingClientRect();
             dropdown.style.top = `${rect.bottom}px`;
             dropdown.style.left = `${rect.left}px`;
-            
+
             // Add options
             options.forEach(option => {
                 const item = document.createElement('div');
@@ -1245,23 +1276,23 @@
                 item.textContent = option;
                 item.style.padding = '8px 15px';
                 item.style.cursor = 'pointer';
-                
+
                 item.addEventListener('mouseover', () => {
                     item.style.backgroundColor = 'var(--block-bg)';
                 });
-                
+
                 item.addEventListener('mouseout', () => {
                     item.style.backgroundColor = '';
                 });
-                
+
                 item.addEventListener('click', () => {
                     handleMenuOption(option);
                     dropdown.remove();
                 });
-                
+
                 dropdown.appendChild(item);
             });
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', function closeDropdown(e) {
                 if (!dropdown.contains(e.target) && e.target !== button) {
@@ -1269,10 +1300,10 @@
                     document.removeEventListener('click', closeDropdown);
                 }
             });
-            
+
             document.body.appendChild(dropdown);
         }
-        
+
         // Handle menu option selection
         function handleMenuOption(option) {
             switch(option) {
@@ -1321,7 +1352,7 @@
                     break;
             }
         }
-        
+
         function resetProject() {
             // Reset sprites
             const spritesContainer = document.querySelector('.sprites');
@@ -1334,7 +1365,7 @@
                     <div>+</div>
                 </div>
             `;
-            
+
             // Reset sprite data
             sprites = {
                 'Sprite 1': {
@@ -1350,54 +1381,54 @@
                     visible: true
                 }
             };
-            
+
             activeSprite = 'Sprite 1';
             document.getElementById('current-sprite-name').textContent = activeSprite;
-            
+
             // Clear workspace
             document.querySelector('.drop-zone').innerHTML = '';
-            
+
             // Initialize canvases
             initCanvases();
-            
+
             // Update sprite properties
             updateSpriteProperties();
-            
+
             // Reattach events
             document.querySelector('.sprite:not(.add-sprite)').addEventListener('click', (e) => {
                 selectSprite(e.currentTarget);
             });
-            
+
             document.querySelector('.add-sprite').addEventListener('click', () => {
                 createNewSprite();
             });
         }
-        
+
         // Show about modal
         function showAboutModal() {
             document.getElementById('about-modal').style.display = 'block';
         }
-        
+
         // Close about modal
         document.getElementById('close-about').addEventListener('click', () => {
             document.getElementById('about-modal').style.display = 'none';
         });
-        
+
         // Paint editor functionality
         document.getElementById('paint-costume').addEventListener('click', () => {
             const paintEditor = document.getElementById('paint-editor');
             paintEditor.style.display = 'block';
-            
+
             const canvas = document.getElementById('paint-canvas');
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         });
-        
+
         document.getElementById('close-paint').addEventListener('click', () => {
             document.getElementById('paint-editor').style.display = 'none';
         });
-        
+
         // Tool selection
         document.querySelectorAll('.painter-tool').forEach(tool => {
             tool.addEventListener('click', () => {
@@ -1406,7 +1437,7 @@
                 paintTool = tool.getAttribute('data-tool');
             });
         });
-        
+
         // Color selection
         document.querySelectorAll('.color-option').forEach(color => {
             color.addEventListener('click', () => {
@@ -1415,16 +1446,16 @@
                 paintColor = color.style.backgroundColor;
             });
         });
-        
+
         // Paint canvas functionality
         const paintCanvas = document.getElementById('paint-canvas');
         const paintCtx = paintCanvas.getContext('2d');
-        
+
         paintCanvas.addEventListener('mousedown', (e) => {
             isPainting = true;
             startX = e.offsetX;
             startY = e.offsetY;
-            
+
             if (paintTool === 'brush') {
                 paintCtx.beginPath();
                 paintCtx.moveTo(startX, startY);
@@ -1433,16 +1464,16 @@
                 paintCtx.strokeStyle = paintColor;
             }
         });
-        
+
         paintCanvas.addEventListener('mousemove', (e) => {
             if (!isPainting) return;
-            
+
             if (paintTool === 'brush') {
                 paintCtx.lineTo(e.offsetX, e.offsetY);
                 paintCtx.stroke();
             }
         });
-        
+
         paintCanvas.addEventListener('mouseup', (e) => {
             if (paintTool === 'line') {
                 paintCtx.beginPath();
@@ -1464,7 +1495,7 @@
                 const radiusX = Math.abs(e.offsetX - startX);
                 const radiusY = Math.abs(e.offsetY - startY);
                 const radius = Math.max(radiusX, radiusY);
-                
+
                 paintCtx.beginPath();
                 paintCtx.arc(startX, startY, radius, 0, Math.PI * 2);
                 paintCtx.strokeStyle = paintColor;
@@ -1488,31 +1519,31 @@
                 paintCtx.arc(e.offsetX, e.offsetY, radius, 0, Math.PI * 2);
                 paintCtx.fill();
             }
-            
+
             isPainting = false;
         });
-        
+
         paintCanvas.addEventListener('mouseleave', () => {
             isPainting = false;
         });
-        
+
         // Save costume
         document.getElementById('save-costume').addEventListener('click', () => {
             const costumeCount = document.querySelectorAll('.costume').length + 1;
             const costumeName = `costume${costumeCount}`;
-            
+
             // Add to sprite's costumes
             sprites[activeSprite].costumes.push(costumeName);
-            
+
             // Create new costume element
             const newCostume = document.createElement('div');
             newCostume.className = 'costume';
             newCostume.setAttribute('data-name', costumeName);
-            
+
             const canvas = document.createElement('canvas');
             canvas.width = 60;
             canvas.height = 60;
-            
+
             // Draw the costume on the smaller canvas
             const ctx = canvas.getContext('2d');
             ctx.drawImage(
@@ -1520,80 +1551,80 @@
                 0, 0, paintCanvas.width, paintCanvas.height,
                 0, 0, 60, 60
             );
-            
+
             const label = document.createElement('div');
             label.textContent = costumeName;
-            
+
             newCostume.appendChild(canvas);
             newCostume.appendChild(label);
-            
+
             // Add to DOM
             document.querySelector('.costumes').appendChild(newCostume);
-            
+
             // Add click event
             newCostume.addEventListener('click', () => {
                 selectCostume(newCostume);
             });
-            
+
             // Close paint editor
             document.getElementById('paint-editor').style.display = 'none';
         });
-        
+
         // Costume selection
         document.querySelectorAll('.costume').forEach(costume => {
             costume.addEventListener('click', () => {
                 selectCostume(costume);
             });
         });
-        
+
         function selectCostume(costumeElement) {
             document.querySelectorAll('.costume').forEach(c => c.classList.remove('active'));
             costumeElement.classList.add('active');
-            
+
             const costumeName = costumeElement.getAttribute('data-name');
             sprites[activeSprite].activeCostume = costumeName;
-            
+
             updatePreviewCanvas();
         }
-        
+
         // Save project functionality
         function saveProject() {
             // Save scripts for the current sprite
             saveSpriteScripts();
-            
+
             // Save all project data
             const projectData = {
                 sprites: sprites
             };
-            
+
             const projectJson = JSON.stringify(projectData);
             localStorage.setItem('betterOcelotProject', projectJson);
-            
+
             alert('Project saved successfully!');
         }
-        
+
         function saveSpriteScripts() {
             const scripts = Array.from(document.querySelectorAll('.drop-zone > .block')).map(block => {
                 // Get outerHTML of block and any connected blocks for this script
                 return getScriptHtml(block);
             });
-            
+
             sprites[activeSprite].scripts = scripts;
         }
-        
+
         function getScriptHtml(block) {
             // Get HTML of a block including its container if it has one
             const container = block.parentElement.classList.contains('block-container') 
                 ? block.parentElement 
                 : null;
-                
+
             if (container) {
                 return container.outerHTML;
             } else {
                 return block.outerHTML;
             }
         }
-        
+
         // Load project functionality
         function loadProject() {
             const projectJson = localStorage.getItem('betterOcelotProject');
@@ -1601,17 +1632,17 @@
                 alert('No saved project found.');
                 return;
             }
-            
+
             try {
                 const projectData = JSON.parse(projectJson);
-                
+
                 // Load sprites
                 sprites = projectData.sprites;
-                
+
                 // Recreate sprite elements
                 const spritesContainer = document.querySelector('.sprites');
                 spritesContainer.innerHTML = ''; // Clear existing sprites
-                
+
                 Object.keys(sprites).forEach(spriteName => {
                     const sprite = document.createElement('div');
                     sprite.className = 'sprite';
@@ -1619,23 +1650,23 @@
                         sprite.classList.add('active');
                     }
                     sprite.setAttribute('data-name', spriteName);
-                    
+
                     const canvas = document.createElement('canvas');
                     canvas.width = 60;
                     canvas.height = 60;
-                    
+
                     const label = document.createElement('div');
                     label.textContent = spriteName;
-                    
+
                     sprite.appendChild(canvas);
                     sprite.appendChild(label);
                     spritesContainer.appendChild(sprite);
-                    
+
                     // Add click event
                     sprite.addEventListener('click', () => {
                         selectSprite(sprite);
                     });
-                    
+
                     // Draw sprite
                     const ctx = canvas.getContext('2d');
                     ctx.fillStyle = getColorForSprite(spriteName);
@@ -1643,72 +1674,72 @@
                     ctx.arc(30, 30, 20, 0, Math.PI * 2);
                     ctx.fill();
                 });
-                
+
                 // Add the "+ sprite" button
                 const addButton = document.createElement('div');
                 addButton.className = 'sprite add-sprite';
                 addButton.innerHTML = '<div>+</div>';
                 spritesContainer.appendChild(addButton);
-                
+
                 addButton.addEventListener('click', () => {
                     createNewSprite();
                 });
-                
+
                 // Select the first sprite
                 activeSprite = Object.keys(sprites)[0];
                 document.getElementById('current-sprite-name').textContent = activeSprite;
-                
+
                 // Load scripts for the active sprite
                 loadSpriteScripts();
-                
+
                 // Update sprite properties
                 updateSpriteProperties();
-                
+
                 alert('Project loaded successfully!');
             } catch(e) {
                 alert('Error loading project: ' + e.message);
                 console.error(e);
             }
         }
-        
+
         // Export project functionality
         function exportProject() {
             // Save scripts for the current sprite
             saveSpriteScripts();
-            
+
             const projectData = {
                 sprites: sprites
             };
-            
+
             const projectJson = JSON.stringify(projectData, null, 2);
-            
+
             // Create a download link
             const downloadLink = document.createElement('a');
             downloadLink.href = URL.createObjectURL(new Blob([projectJson], {type: 'application/json'}));
             downloadLink.download = 'ocelot_project.json';
-            
+
             // Append to body, click and remove
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
         }
-        
+
         // Run the project
         function runProject() {
             // Save scripts for the current sprite first
             saveSpriteScripts();
-            
+
             // Show canvas
             document.getElementById('canvas-container').style.display = 'block';
-            
+
             // Get the canvas and context
             const canvas = document.getElementById('project-canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Clear canvas
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // Draw all sprites
             Object.keys(sprites).forEach(spriteName => {
                 const sprite = sprites[spriteName];
@@ -1716,14 +1747,14 @@
                     // Calculate position (center of canvas + sprite coordinates)
                     const x = canvas.width / 2 + sprite.x;
                     const y = canvas.height / 2 - sprite.y; // Y is inverted in canvas
-                    
+
                     // Calculate size
                     const size = 40 * (sprite.size / 100);
-                    
+
                     // Save context for rotation
                     ctx.save();
                     ctx.translate(x, y);
-                    
+
                     // Apply rotation based on rotation style
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.rotate((sprite.direction - 90) * Math.PI / 180);
@@ -1733,13 +1764,13 @@
                             ctx.scale(-1, 1);
                         }
                     }
-                    
+
                     // Draw sprite
                     ctx.fillStyle = getColorForSprite(spriteName);
                     ctx.beginPath();
                     ctx.arc(0, 0, size, 0, Math.PI * 2);
                     ctx.fill();
-                    
+
                     // Draw direction indicator
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.fillStyle = 'white';
@@ -1747,9 +1778,9 @@
                         ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    
+
                     ctx.restore();
-                    
+
                     // Draw sprite name
                     ctx.fillStyle = 'black';
                     ctx.font = '14px Arial';
@@ -1757,28 +1788,28 @@
                     ctx.fillText(spriteName, x, y + size + 20);
                 }
             });
-            
+
             // Execute the scripts for all sprites
             Object.keys(sprites).forEach(spriteName => {
                 executeScripts(spriteName);
             });
         }
-        
+
         // Close canvas button
         document.getElementById('close-canvas').addEventListener('click', () => {
             document.getElementById('canvas-container').style.display = 'none';
         });
-        
+
         // Execute scripts for a sprite
         function executeScripts(spriteName) {
             const sprite = sprites[spriteName];
-            
+
             sprite.scripts.forEach(scriptHtml => {
                 // Create a temporary element to parse the HTML
                 const tempEl = document.createElement('div');
                 tempEl.innerHTML = scriptHtml;
                 const blocks = tempEl.querySelectorAll('.block');
-                
+
                 // Execute each block with animation
                 blocks.forEach((block, index) => {
                     setTimeout(() => {
@@ -1787,37 +1818,37 @@
                 });
             });
         }
-        
+
         // Execute a single block
         function executeBlock(block, spriteName) {
             const sprite = sprites[spriteName];
             const canvas = document.getElementById('project-canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Determine block type and action
             if (block.classList.contains('motion')) {
                 if (block.textContent.includes('Move')) {
                     // Extract steps value from the block's input
                     const stepsInput = block.querySelector('.block-input');
                     const steps = stepsInput ? parseInt(stepsInput.textContent) : 10;
-                    
+
                     // Calculate new position based on direction
                     const angle = sprite.direction * (Math.PI / 180);
                     sprite.x += steps * Math.cos(angle);
                     sprite.y += steps * Math.sin(angle);
-                    
+
                     // Redraw canvas
                     redrawCanvas();
                 } else if (block.textContent.includes('Turn right')) {
                     const degreesInput = block.querySelector('.block-input');
                     const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
-                    
+
                     sprite.direction = (sprite.direction + degrees) % 360;
                     redrawCanvas();
                 } else if (block.textContent.includes('Turn left')) {
                     const degreesInput = block.querySelector('.block-input');
                     const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
-                    
+
                     sprite.direction = (sprite.direction - degrees + 360) % 360;
                     redrawCanvas();
                 } else if (block.textContent.includes('Go to x:')) {
@@ -1832,11 +1863,11 @@
                 if (block.textContent.includes('Say')) {
                     const textInput = block.querySelector('.block-input');
                     const text = textInput ? textInput.textContent : 'Hello!';
-                    
+
                     // Calculate position
                     const x = canvas.width / 2 + sprite.x;
                     const y = canvas.height / 2 - sprite.y;
-                    
+
                     // Draw speech bubble
                     ctx.fillStyle = 'white';
                     ctx.beginPath();
@@ -1845,14 +1876,14 @@
                     ctx.strokeStyle = 'black';
                     ctx.lineWidth = 2;
                     ctx.stroke();
-                    
+
                     // Draw speech bubble tail
                     ctx.beginPath();
                     ctx.moveTo(x + 20, y - 10);
                     ctx.quadraticCurveTo(x + 30, y - 20, x + 40, y - 30);
                     ctx.stroke();
                     ctx.fill();
-                    
+
                     // Draw text
                     ctx.fillStyle = 'black';
                     ctx.font = '14px Arial';
@@ -1861,18 +1892,18 @@
                 } else if (block.textContent.includes('Change size by')) {
                     const sizeInput = block.querySelector('.block-input');
                     const sizeChange = sizeInput ? parseInt(sizeInput.textContent) : 10;
-                    
+
                     sprite.size += sizeChange;
                     if (sprite.size < 1) sprite.size = 1;
-                    
+
                     redrawCanvas();
                 } else if (block.textContent.includes('Set size to')) {
                     const sizeInput = block.querySelector('.block-input');
                     const newSize = sizeInput ? parseInt(sizeInput.textContent) : 100;
-                    
+
                     sprite.size = newSize;
                     if (sprite.size < 1) sprite.size = 1;
-                    
+
                     redrawCanvas();
                 } else if (block.textContent.includes('Hide')) {
                     sprite.visible = false;
@@ -1902,15 +1933,15 @@
                 }
             }
         }
-        
+
         function redrawCanvas() {
             const canvas = document.getElementById('project-canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Clear canvas
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // Draw all sprites
             Object.keys(sprites).forEach(spriteName => {
                 const sprite = sprites[spriteName];
@@ -1918,14 +1949,14 @@
                     // Calculate position
                     const x = canvas.width / 2 + sprite.x;
                     const y = canvas.height / 2 - sprite.y;
-                    
+
                     // Calculate size
                     const size = 40 * (sprite.size / 100);
-                    
+
                     // Save context for rotation
                     ctx.save();
                     ctx.translate(x, y);
-                    
+
                     // Apply rotation based on rotation style
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.rotate((sprite.direction - 90) * Math.PI / 180);
@@ -1935,13 +1966,13 @@
                             ctx.scale(-1, 1);
                         }
                     }
-                    
+
                     // Draw sprite
                     ctx.fillStyle = getColorForSprite(spriteName);
                     ctx.beginPath();
                     ctx.arc(0, 0, size, 0, Math.PI * 2);
                     ctx.fill();
-                    
+
                     // Draw direction indicator
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.fillStyle = 'white';
@@ -1949,9 +1980,9 @@
                         ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    
+
                     ctx.restore();
-                    
+
                     // Draw sprite name
                     ctx.fillStyle = 'black';
                     ctx.font = '14px Arial';
@@ -1959,20 +1990,20 @@
                     ctx.fillText(spriteName, x, y + size + 20);
                 }
             });
-            
+
             // Update preview canvas too
             updatePreviewCanvas();
         }
-        
+
         // Update the preview canvas to show all sprites
         function updatePreviewCanvas() {
             const canvas = document.getElementById('preview-canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // Clear canvas
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // Draw all sprites
             Object.keys(sprites).forEach(spriteName => {
                 const sprite = sprites[spriteName];
@@ -1980,14 +2011,14 @@
                     // Calculate position (center of canvas + sprite coordinates)
                     const x = canvas.width / 2 + sprite.x;
                     const y = canvas.height / 2 - sprite.y; // Y is inverted in canvas
-                    
+
                     // Calculate size
                     const size = 20 * (sprite.size / 100);
-                    
+
                     // Save context for rotation
                     ctx.save();
                     ctx.translate(x, y);
-                    
+
                     // Apply rotation based on rotation style
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.rotate((sprite.direction - 90) * Math.PI / 180);
@@ -1997,13 +2028,13 @@
                             ctx.scale(-1, 1);
                         }
                     }
-                    
+
                     // Draw sprite
                     ctx.fillStyle = getColorForSprite(spriteName);
                     ctx.beginPath();
                     ctx.arc(0, 0, size, 0, Math.PI * 2);
                     ctx.fill();
-                    
+
                     // Draw direction indicator
                     if (sprite.rotationStyle === 'all-around') {
                         ctx.fillStyle = 'white';
@@ -2011,9 +2042,9 @@
                         ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
                         ctx.fill();
                     }
-                    
+
                     ctx.restore();
-                    
+
                     // Add highlight for active sprite
                     if (spriteName === activeSprite) {
                         ctx.strokeStyle = 'var(--accent-color)';
@@ -2023,7 +2054,7 @@
                 }
             });
         }
-        
+
         // Get a color for a sprite based on its name
         function getColorForSprite(name) {
             // Simple hash function to generate a color
@@ -2031,11 +2062,11 @@
             for (let i = 0; i < name.length; i++) {
                 hash = name.charCodeAt(i) + ((hash << 5) - hash);
             }
-            
+
             const hue = hash % 360;
             return `hsl(${hue}, 80%, 50%)`;
         }
-        
+
         // Initialize canvases for sprites and costumes
         function initCanvases() {
             // Initialize sprite canvases
@@ -2043,19 +2074,19 @@
                 const canvas = sprite.querySelector('canvas');
                 const ctx = canvas.getContext('2d');
                 const spriteName = sprite.getAttribute('data-name');
-                
+
                 ctx.fillStyle = getColorForSprite(spriteName);
                 ctx.beginPath();
                 ctx.arc(30, 30, 20, 0, Math.PI * 2);
                 ctx.fill();
             });
-            
+
             // Initialize costume canvases
             document.querySelectorAll('.costume').forEach(costume => {
                 const canvas = costume.querySelector('canvas');
                 const ctx = canvas.getContext('2d');
                 const costumeName = costume.getAttribute('data-name');
-                
+
                 // For demo, just draw colored squares for costumes
                 if (costumeName === 'costume1') {
                     ctx.fillStyle = 'red';
@@ -2068,24 +2099,24 @@
                 }
             });
         }
-        
+
         // Drag and Drop functionality
         let draggedBlock = null;
-        
+
         // Make blocks in the sidebar draggable
         document.querySelectorAll('.sidebar .block, .sidebar .operator-block').forEach(block => {
             block.setAttribute('draggable', 'true');
-            
+
             block.addEventListener('dragstart', (e) => {
                 draggedBlock = block;
                 e.dataTransfer.setData('text/plain', block.textContent);
                 e.dataTransfer.effectAllowed = 'copy';
             });
         });
-        
+
         // Make the drop zone accept drops
         const dropZone = document.querySelector('.drop-zone');
-        
+
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             if (draggedBlock) {
@@ -2093,22 +2124,91 @@
             }
             dropZone.style.backgroundColor = '#383838';
         });
-        
+
         dropZone.addEventListener('dragleave', () => {
             dropZone.style.backgroundColor = '#282828';
         });
-        
+
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.style.backgroundColor = '#282828';
-            
+
             // Process drop
             processBlockDrop(e, dropZone);
         });
-        
+
+        // Show context menu
+        function showContextMenu(x, y, target) {
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = `${x}px`;
+            contextMenu.style.top = `${y}px`;
+
+            // Set up context menu actions
+            contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    const action = item.textContent;
+
+                    switch(action) {
+                        case 'Delete':
+                            if (target.closest('.drop-zone')) {
+                                const blockToRemove = target.classList.contains('block-container') 
+                                    ? target 
+                                    : (target.closest('.block-container') || target);
+                                blockToRemove.remove();
+                            } else if (target.classList.contains('block') && target.closest('.sidebar')) {
+                                // For sidebar blocks, you could also drag them to a trash area
+                                alert('To delete a block from scripts, drag it back to the blocks palette');
+                            }
+                            break;
+                        case 'Duplicate':
+                            if (target.closest('.drop-zone')) {
+                                const blockToDuplicate = target.classList.contains('block-container') 
+                                    ? target 
+                                    : (target.closest('.block-container') || target);
+                                const duplicate = blockToDuplicate.cloneNode(true);
+                                blockToDuplicate.after(duplicate);
+                                setupWorkspaceBlockDrag(duplicate.querySelector('.block') || duplicate);
+                            }
+                            break;
+                        case 'Copy':
+                            clipboardBlock = target.cloneNode(true);
+                            break;
+                        case 'Paste':
+                            if (clipboardBlock && target.closest('.drop-zone')) {
+                                const pastedBlock = clipboardBlock.cloneNode(true);
+                                target.after(pastedBlock);
+                                setupWorkspaceBlockDrag(pastedBlock);
+                            }
+                            break;
+                        case 'Help':
+                            alert('Help for this block type will be available in a future update.');
+                            break;
+                    }
+
+                    contextMenu.style.display = 'none';
+                };
+            });
+        }
+
+        // Process drop
         function processBlockDrop(e, dropZone) {
             if (!draggedBlock) return;
-            
+
+            // Check if dropping on the blocks palette (deletion)
+            const elementsAtDrop = document.elementsFromPoint(e.clientX, e.clientY);
+            const isOverSidebar = elementsAtDrop.some(el => el.classList && el.classList.contains('sidebar'));
+
+            if (isOverSidebar && draggedBlock.closest('.drop-zone')) {
+                // Delete block when dragged from workspace to sidebar
+                const blockToRemove = draggedBlock.classList.contains('block-container') 
+                    ? draggedBlock 
+                    : (draggedBlock.closest('.block-container') || draggedBlock);
+                blockToRemove.remove();
+                draggedBlock = null;
+                return;
+            }
+
             // Handle block inputs
             if (draggedBlock.classList.contains('operator-block')) {
                 // Only drop operator blocks into inputs
@@ -2116,27 +2216,32 @@
                 if (targetInput) {
                     // Clone the operator block
                     const newBlock = draggedBlock.cloneNode(true);
-                    
+
                     // Replace the input with the operator
                     targetInput.innerHTML = '';
                     targetInput.appendChild(newBlock);
-                    
+
                     // Set up draggable for the new block
                     newBlock.addEventListener('dragstart', (e) => {
                         draggedBlock = newBlock;
                         e.dataTransfer.setData('text/plain', newBlock.textContent);
                         e.stopPropagation();
                     });
+
+                    // Add right-click context menu
+                    newBlock.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        showContextMenu(e.clientX, e.clientY, newBlock);
+                    });
                 }
                 return;
             }
-            
-            // Handle normal blocks
+
             if (draggedBlock.parentNode.classList.contains('blocks')) {
                 // Creating a new block from sidebar
                 const newBlock = draggedBlock.cloneNode(true);
                 newBlock.style.marginBottom = '5px';
-                
+
                 // Check if it's a block that needs an end block
                 if (
                     (newBlock.classList.contains('control') && 
@@ -2148,14 +2253,14 @@
                     // Create a container for this block and its end block
                     const container = document.createElement('div');
                     container.className = 'block-container';
-                    
+
                     // Add the block to the container
                     container.appendChild(newBlock);
-                    
+
                     // Create the corresponding end block
                     const endBlock = document.createElement('div');
                     endBlock.className = `block control block-end`;
-                    
+
                     // Determine the type of end block
                     if (newBlock.textContent.includes('Forever')) {
                         endBlock.textContent = 'End forever';
@@ -2168,19 +2273,19 @@
                     } else {
                         endBlock.textContent = 'End if';
                     }
-                    
+
                     // Add the end block to the container
                     container.appendChild(endBlock);
-                    
+
                     // Add the container to the drop zone
                     dropZone.appendChild(container);
-                    
+
                     // Set up drag for the new block
                     setupWorkspaceBlockDrag(newBlock);
                 } else if (!newBlock.classList.contains('block-end')) {
                     // Add the single block to the drop zone
                     dropZone.appendChild(newBlock);
-                    
+
                     // Set up drag for the new block
                     setupWorkspaceBlockDrag(newBlock);
                 }
@@ -2188,25 +2293,25 @@
                 // Reordering existing blocks in the workspace
                 const y = e.clientY;
                 const blocks = Array.from(dropZone.querySelectorAll(':scope > .block, :scope > .block-container'));
-                
+
                 // Find the block to insert before
                 let insertBeforeBlock = null;
                 for (let i = 0; i < blocks.length; i++) {
                     const block = blocks[i];
                     const rect = block.getBoundingClientRect();
                     const blockMiddle = rect.top + rect.height / 2;
-                    
+
                     if (y < blockMiddle) {
                         insertBeforeBlock = block;
                         break;
                     }
                 }
-                
+
                 // Get the block or container to move
                 const blockToMove = draggedBlock.classList.contains('block-container') 
                     ? draggedBlock 
                     : (draggedBlock.closest('.block-container') || draggedBlock);
-                
+
                 // Move the block
                 if (insertBeforeBlock) {
                     dropZone.insertBefore(blockToMove, insertBeforeBlock);
@@ -2214,10 +2319,10 @@
                     dropZone.appendChild(blockToMove);
                 }
             }
-            
+
             draggedBlock = null;
         }
-        
+
         function findDropTarget(x, y, selector) {
             const elements = document.elementsFromPoint(x, y);
             for (let i = 0; i < elements.length; i++) {
@@ -2227,27 +2332,27 @@
             }
             return null;
         }
-        
+
         // Make blocks in the workspace draggable
         function setupWorkspaceBlockDrag(block) {
             block.setAttribute('draggable', 'true');
-            
+
             block.addEventListener('dragstart', (e) => {
                 draggedBlock = block;
                 e.dataTransfer.setData('text/plain', block.textContent);
                 e.dataTransfer.effectAllowed = 'move';
-                
+
                 // Delay to allow dragstart to complete
                 setTimeout(() => {
                     block.style.opacity = '0.4';
                 }, 0);
             });
-            
+
             block.addEventListener('dragend', () => {
                 block.style.opacity = '1';
                 draggedBlock = null;
             });
-            
+
             // Make inputs accept operator blocks
             block.querySelectorAll('.block-input').forEach(input => {
                 input.addEventListener('dragover', (e) => {
@@ -2257,24 +2362,24 @@
                         input.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
                     }
                 });
-                
+
                 input.addEventListener('dragleave', () => {
                     input.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
                 });
-                
+
                 input.addEventListener('drop', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     input.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-                    
+
                     if (draggedBlock && draggedBlock.classList.contains('operator-block')) {
                         // Clone the operator block
                         const newBlock = draggedBlock.cloneNode(true);
-                        
+
                         // Replace the input with the operator
                         input.innerHTML = '';
                         input.appendChild(newBlock);
-                        
+
                         // Set up draggable for the new block
                         newBlock.addEventListener('dragstart', (e) => {
                             draggedBlock = newBlock;
@@ -2284,31 +2389,31 @@
                     }
                 });
             });
-            
+
             // Make inputs editable on click
             block.querySelectorAll('.block-input').forEach(input => {
                 if (!input.querySelector('.operator-block')) { // Don't make inputs that contain operators editable
                     input.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        
+
                         const currentValue = input.textContent;
                         const newValue = prompt('Enter value:', currentValue);
-                        
+
                         if (newValue !== null) {
                             input.textContent = newValue;
                         }
                     });
                 }
             });
-            
+
             // Make dropdowns selectable
             block.querySelectorAll('.block-dropdown').forEach(dropdown => {
                 dropdown.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    
+
                     // Define options based on dropdown content
                     let options = [];
-                    
+
                     if (dropdown.textContent.includes('costume')) {
                         options = sprites[activeSprite].costumes;
                     } else if (dropdown.textContent.includes('backdrop')) {
@@ -2331,12 +2436,12 @@
                         options = ['all', 'this script', 'other scripts in sprite'];
                     } else if (dropdown.textContent.includes('message')) {
                         options = ['message1', 'message2', 'new message...'];
-                    } else if (dropdown.textContent.includes('my variable')) {
+                    } else if (if (dropdown.textContent.includes('my variable')) {
                         options = ['my variable', 'create variable...'];
                     } else if (dropdown.textContent.includes('Sprite')) {
                         options = Object.keys(sprites);
                     }
-                    
+
                     if (options.length > 0) {
                         // Create dropdown menu
                         const menu = document.createElement('div');
@@ -2346,37 +2451,37 @@
                         menu.style.borderRadius = '5px';
                         menu.style.padding = '5px 0';
                         menu.style.zIndex = '100';
-                        
+
                         const rect = dropdown.getBoundingClientRect();
                         menu.style.left = `${rect.left}px`;
                         menu.style.top = `${rect.bottom}px`;
-                        
+
                         // Add options to menu
                         options.forEach(option => {
                             const item = document.createElement('div');
                             item.style.padding = '5px 10px';
                             item.style.cursor = 'pointer';
                             item.textContent = option;
-                            
+
                             item.addEventListener('mouseover', () => {
                                 item.style.backgroundColor = 'var(--block-bg)';
                             });
-                            
+
                             item.addEventListener('mouseout', () => {
                                 item.style.backgroundColor = '';
                             });
-                            
+
                             item.addEventListener('click', () => {
                                 dropdown.textContent = option;
                                 document.body.removeChild(menu);
                             });
-                            
+
                             menu.appendChild(item);
                         });
-                        
+
                         // Add to document body
                         document.body.appendChild(menu);
-                        
+
                         // Close when clicking outside
                         document.addEventListener('click', function closeMenu() {
                             if (document.body.contains(menu)) {
@@ -2386,6 +2491,12 @@
                         });
                     }
                 });
+            });
+
+            // Add right-click context menu to workspace blocks
+            block.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                showContextMenu(e.clientX, e.clientY, block);
             });
         }
     </script>
