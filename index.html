@@ -1,0 +1,2393 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Better Ocelot IDE</title>
+    <style>
+        :root {
+            --main-bg: #1e1e1e;
+            --header-bg: #2c2c2c;
+            --sidebar-bg: #252526;
+            --block-bg: #4a4a4a;
+            --accent-color: #4CAF50;
+            --text-color: #e0e0e0;
+            --border-color: #3e3e3e;
+            --block-motion: #6956c4;
+            --block-looks: #9356b0;
+            --block-events: #de9e2e;
+            --block-control: #e1a91a;
+            --block-operators: #5cb712;
+            --block-sensing: #5cb8d8;
+            --block-variables: #ff8c1a;
+            --block-my-blocks: #ff6680;
+            --block-pen: #0fbd8c;
+            --block-sound: #d65cd6;
+        }
+        
+        body {
+            display: grid;
+            grid-template-areas:
+                "header header header"
+                "sidebar main-content property-panel"
+                "footer footer footer";
+            grid-template-rows: 50px 1fr 30px;
+            grid-template-columns: 250px 3fr 250px;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-color);
+        }
+
+        .header {
+            grid-area: header;
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background-color: var(--sidebar-bg);
+            padding: 10px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .category {
+            margin-bottom: 15px;
+        }
+
+        .category-header {
+            padding: 8px 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .block {
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .block-input {
+            background-color: rgba(255, 255, 255, 0.3);
+            min-width: 30px;
+            height: 18px;
+            border-radius: 3px;
+            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+
+        .block-dropdown {
+            background-color: rgba(255, 255, 255, 0.3);
+            min-width: 60px;
+            height: 18px;
+            border-radius: 3px;
+            margin: 0 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+        }
+        
+        .block {
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+            cursor: move;
+            display: flex;
+            align-items: center;
+            position: relative;
+            flex-wrap: wrap;
+            word-break: keep-all;
+        }
+
+        .block-end {
+            margin-top: -5px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+
+        .block-container {
+            margin-left: 20px;
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+
+        .operator-block {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 15px;
+            padding: 3px 8px;
+            margin: 0 5px;
+        }
+
+        .motion {
+            background-color: var(--block-motion);
+        }
+
+        .looks {
+            background-color: var(--block-looks);
+        }
+
+        .events {
+            background-color: var(--block-events);
+        }
+
+        .control {
+            background-color: var(--block-control);
+        }
+
+        .operators {
+            background-color: var(--block-operators);
+        }
+
+        .sensing {
+            background-color: var(--block-sensing);
+        }
+
+        .variables {
+            background-color: var(--block-variables);
+        }
+
+        .my-blocks {
+            background-color: var(--block-my-blocks);
+        }
+
+        .pen {
+            background-color: var(--block-pen);
+        }
+
+        .sound {
+            background-color: var(--block-sound);
+        }
+
+        .main-content {
+            grid-area: main-content;
+            display: grid;
+            grid-template-rows: 1fr 40%;
+            overflow: hidden;
+        }
+
+        .workspace {
+            background-color: #2d2d2d;
+            padding: 20px;
+            overflow: auto;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .sprite-area {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background-color: #333;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #2a2a2a;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .tab.active {
+            background-color: #333;
+            color: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: auto;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .sprites {
+            display: flex;
+            padding: 10px;
+            overflow-x: auto;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .costumes {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .sounds {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .sprite {
+            width: 80px;
+            height: 80px;
+            background-color: #444;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sprite.active {
+            border: 2px solid var(--accent-color);
+        }
+
+        .costume {
+            width: 80px;
+            height: 80px;
+            background-color: #444;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .costume.active {
+            border: 2px solid var(--accent-color);
+        }
+
+        .sound-item {
+            padding: 10px;
+            background-color: #444;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .property-panel {
+            grid-area: property-panel;
+            background-color: var(--sidebar-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-canvas {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background-color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .property {
+            margin-bottom: 8px;
+        }
+
+        .property-label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 5px;
+            background-color: #333;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 3px;
+        }
+
+        .rotation-picker {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #333;
+            position: relative;
+            margin: 10px auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .rotation-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 50%;
+            background-color: var(--accent-color);
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(0deg);
+        }
+
+        .footer {
+            grid-area: footer;
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+            text-align: center;
+            line-height: 30px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        .drop-zone {
+            min-height: 200px;
+            background-color: #282828;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            user-select: none;
+        }
+
+        .script-area {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .toolbar {
+            background-color: #333;
+            padding: 5px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .toolbar button {
+            background-color: #444;
+            border: none;
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .toolbar button:hover {
+            background-color: #555;
+        }
+
+        .editor-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+        }
+
+        .editor-content {
+            position: relative;
+            width: 80%;
+            height: 80%;
+            margin: 5% auto;
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .editor-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .painter-tools {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .painter-tool {
+            width: 40px;
+            height: 40px;
+            background-color: #444;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .painter-tool.active {
+            background-color: var(--accent-color);
+        }
+
+        .painter-canvas {
+            background-color: white;
+            border: 1px solid #555;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .color-option.active {
+            outline: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">Better Ocelot IDE</div>
+        <div class="menu">
+            <button id="file-menu">File</button>
+            <button id="edit-menu">Edit</button>
+            <button id="help-menu">Help</button>
+            <button id="run-button">Run ▶</button>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-motion);">Motion</div>
+            <div class="blocks">
+                <div class="block motion" draggable="true">Move <span class="block-input">10</span> steps</div>
+                <div class="block motion" draggable="true">Turn right <span class="block-input">15</span> degrees</div>
+                <div class="block motion" draggable="true">Turn left <span class="block-input">15</span> degrees</div>
+                <div class="block motion" draggable="true">Go to x: <span class="block-input">0</span> y: <span class="block-input">0</span></div>
+                <div class="block motion" draggable="true">Glide <span class="block-input">1</span> secs to x: <span class="block-input">0</span> y: <span class="block-input">0</span></div>
+                <div class="block motion" draggable="true">Point in direction <span class="block-input">90</span></div>
+                <div class="block motion" draggable="true">Point towards <span class="block-dropdown">mouse-pointer</span></div>
+                <div class="block motion" draggable="true">Change x by <span class="block-input">10</span></div>
+                <div class="block motion" draggable="true">Set x to <span class="block-input">0</span></div>
+                <div class="block motion" draggable="true">Change y by <span class="block-input">10</span></div>
+                <div class="block motion" draggable="true">Set y to <span class="block-input">0</span></div>
+                <div class="block motion" draggable="true">If on edge, bounce</div>
+                <div class="block motion" draggable="true">Set rotation style <span class="block-dropdown">all around</span></div>
+                <div class="block motion" draggable="true">X position</div>
+                <div class="block motion" draggable="true">Y position</div>
+                <div class="block motion" draggable="true">Direction</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-looks);">Looks</div>
+            <div class="blocks">
+                <div class="block looks" draggable="true">Say <span class="block-input">Hello!</span></div>
+                <div class="block looks" draggable="true">Say <span class="block-input">Hello!</span> for <span class="block-input">2</span> seconds</div>
+                <div class="block looks" draggable="true">Think <span class="block-input">Hmm...</span></div>
+                <div class="block looks" draggable="true">Think <span class="block-input">Hmm...</span> for <span class="block-input">2</span> seconds</div>
+                <div class="block looks" draggable="true">Switch costume to <span class="block-dropdown">costume1</span></div>
+                <div class="block looks" draggable="true">Next costume</div>
+                <div class="block looks" draggable="true">Switch backdrop to <span class="block-dropdown">backdrop1</span></div>
+                <div class="block looks" draggable="true">Next backdrop</div>
+                <div class="block looks" draggable="true">Change size by <span class="block-input">10</span></div>
+                <div class="block looks" draggable="true">Set size to <span class="block-input">100</span>%</div>
+                <div class="block looks" draggable="true">Change <span class="block-dropdown">color</span> effect by <span class="block-input">25</span></div>
+                <div class="block looks" draggable="true">Set <span class="block-dropdown">color</span> effect to <span class="block-input">0</span></div>
+                <div class="block looks" draggable="true">Clear graphic effects</div>
+                <div class="block looks" draggable="true">Show</div>
+                <div class="block looks" draggable="true">Hide</div>
+                <div class="block looks" draggable="true">Go to <span class="block-dropdown">front</span> layer</div>
+                <div class="block looks" draggable="true">Go <span class="block-dropdown">forward</span> <span class="block-input">1</span> layers</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-sound);">Sound</div>
+            <div class="blocks">
+                <div class="block sound" draggable="true">Play sound <span class="block-dropdown">meow</span></div>
+                <div class="block sound" draggable="true">Play sound <span class="block-dropdown">meow</span> until done</div>
+                <div class="block sound" draggable="true">Stop all sounds</div>
+                <div class="block sound" draggable="true">Change volume by <span class="block-input">-10</span></div>
+                <div class="block sound" draggable="true">Set volume to <span class="block-input">100</span>%</div>
+                <div class="block sound" draggable="true">Volume</div>
+                <div class="block sound" draggable="true">Change pitch by <span class="block-input">10</span></div>
+                <div class="block sound" draggable="true">Set pitch to <span class="block-input">100</span></div>
+                <div class="block sound" draggable="true">Pitch</div>
+                <div class="block sound" draggable="true">Change pan left/right by <span class="block-input">10</span></div>
+                <div class="block sound" draggable="true">Set pan left/right to <span class="block-input">0</span></div>
+                <div class="block sound" draggable="true">Pan left/right</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-events);">Events</div>
+            <div class="blocks">
+                <div class="block events" draggable="true">When flag clicked</div>
+                <div class="block events" draggable="true">When <span class="block-dropdown">space</span> key pressed</div>
+                <div class="block events" draggable="true">When this sprite clicked</div>
+                <div class="block events" draggable="true">When backdrop switches to <span class="block-dropdown">backdrop1</span></div>
+                <div class="block events" draggable="true">When <span class="block-dropdown">loudness</span> > <span class="block-input">10</span></div>
+                <div class="block events" draggable="true">When I receive <span class="block-dropdown">message1</span></div>
+                <div class="block events" draggable="true">Broadcast <span class="block-dropdown">message1</span></div>
+                <div class="block events" draggable="true">Broadcast <span class="block-dropdown">message1</span> and wait</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-control);">Control</div>
+            <div class="blocks">
+                <div class="block control" draggable="true">Wait <span class="block-input">1</span> seconds</div>
+                <div class="block control" draggable="true">Repeat <span class="block-input">10</span></div>
+                <div class="block control block-end" draggable="true">End repeat</div>
+                <div class="block control" draggable="true">Forever</div>
+                <div class="block control block-end" draggable="true">End forever</div>
+                <div class="block control" draggable="true">If <span class="block-input"></span> then</div>
+                <div class="block control block-end" draggable="true">End if</div>
+                <div class="block control" draggable="true">If <span class="block-input"></span> then</div>
+                <div class="block control" draggable="true">Else</div>
+                <div class="block control block-end" draggable="true">End if else</div>
+                <div class="block control" draggable="true">Wait until <span class="block-input"></span></div>
+                <div class="block control" draggable="true">Repeat until <span class="block-input"></span></div>
+                <div class="block control block-end" draggable="true">End repeat until</div>
+                <div class="block control" draggable="true">Stop <span class="block-dropdown">all</span></div>
+                <div class="block control" draggable="true">When I start as a clone</div>
+                <div class="block control" draggable="true">Create clone of <span class="block-dropdown">myself</span></div>
+                <div class="block control" draggable="true">Delete this clone</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-sensing);">Sensing</div>
+            <div class="blocks">
+                <div class="block sensing" draggable="true">Touching <span class="block-dropdown">mouse-pointer</span>?</div>
+                <div class="block sensing" draggable="true">Touching color <span class="block-input" style="background-color: #ff0000; width: 20px;"></span>?</div>
+                <div class="block sensing" draggable="true">Color <span class="block-input" style="background-color: #ff0000; width: 20px;"></span> is touching <span class="block-input" style="background-color: #0000ff; width: 20px;"></span>?</div>
+                <div class="block sensing" draggable="true">Distance to <span class="block-dropdown">mouse-pointer</span></div>
+                <div class="block sensing" draggable="true">Ask <span class="block-input">What's your name?</span> and wait</div>
+                <div class="block sensing" draggable="true">Answer</div>
+                <div class="block sensing" draggable="true">Key <span class="block-dropdown">space</span> pressed?</div>
+                <div class="block sensing" draggable="true">Mouse down?</div>
+                <div class="block sensing" draggable="true">Mouse x</div>
+                <div class="block sensing" draggable="true">Mouse y</div>
+                <div class="block sensing" draggable="true">Loudness</div>
+                <div class="block sensing" draggable="true">Timer</div>
+                <div class="block sensing" draggable="true">Reset timer</div>
+                <div class="block sensing" draggable="true"><span class="block-dropdown">x position</span> of <span class="block-dropdown">Sprite1</span></div>
+                <div class="block sensing" draggable="true">Current <span class="block-dropdown">year</span></div>
+                <div class="block sensing" draggable="true">Days since 2000</div>
+                <div class="block sensing" draggable="true">Username</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-operators);">Operators</div>
+            <div class="blocks">
+                <div class="operator-block operators" draggable="true"><span class="block-input">0</span> + <span class="block-input">0</span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input">0</span> - <span class="block-input">0</span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input">0</span> * <span class="block-input">0</span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input">0</span> / <span class="block-input">0</span></div>
+                <div class="operator-block operators" draggable="true">Pick random <span class="block-input">1</span> to <span class="block-input">10</span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input"></span> < <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input"></span> = <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input"></span> > <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input"></span> and <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input"></span> or <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true">not <span class="block-input"></span></div>
+                <div class="operator-block operators" draggable="true">join <span class="block-input">hello</span> <span class="block-input">world</span></div>
+                <div class="operator-block operators" draggable="true">letter <span class="block-input">1</span> of <span class="block-input">world</span></div>
+                <div class="operator-block operators" draggable="true">length of <span class="block-input">world</span></div>
+                <div class="operator-block operators" draggable="true"><span class="block-input">world</span> contains <span class="block-input">or</span>?</div>
+                <div class="operator-block operators" draggable="true"><span class="block-input">10</span> mod <span class="block-input">2</span></div>
+                <div class="operator-block operators" draggable="true">round <span class="block-input">3.5</span></div>
+                <div class="operator-block operators" draggable="true">abs of <span class="block-input">-50</span></div>
+                <div class="operator-block operators" draggable="true">floor of <span class="block-input">3.9</span></div>
+                <div class="operator-block operators" draggable="true">ceiling of <span class="block-input">3.1</span></div>
+                <div class="operator-block operators" draggable="true">sqrt of <span class="block-input">16</span></div>
+                <div class="operator-block operators" draggable="true">sin of <span class="block-input">90</span></div>
+                <div class="operator-block operators" draggable="true">cos of <span class="block-input">90</span></div>
+                <div class="operator-block operators" draggable="true">tan of <span class="block-input">45</span></div>
+                <div class="operator-block operators" draggable="true">asin of <span class="block-input">1</span></div>
+                <div class="operator-block operators" draggable="true">acos of <span class="block-input">0</span></div>
+                <div class="operator-block operators" draggable="true">atan of <span class="block-input">1</span></div>
+                <div class="operator-block operators" draggable="true">ln of <span class="block-input">1</span></div>
+                <div class="operator-block operators" draggable="true">log of <span class="block-input">100</span></div>
+                <div class="operator-block operators" draggable="true">e ^ <span class="block-input">1</span></div>
+                <div class="operator-block operators" draggable="true">10 ^ <span class="block-input">2</span></div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-variables);">Variables</div>
+            <div class="blocks">
+                <div class="block variables" draggable="true">Set <span class="block-dropdown">my variable</span> to <span class="block-input">0</span></div>
+                <div class="block variables" draggable="true">Change <span class="block-dropdown">my variable</span> by <span class="block-input">1</span></div>
+                <div class="block variables" draggable="true">Show variable <span class="block-dropdown">my variable</span></div>
+                <div class="block variables" draggable="true">Hide variable <span class="block-dropdown">my variable</span></div>
+                <div class="block variables" draggable="true"><span class="block-dropdown">my variable</span></div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-my-blocks);">My Blocks</div>
+            <div class="blocks">
+                <div class="block my-blocks" draggable="true">Define <span class="block-input">block name</span></div>
+                <div class="block my-blocks" draggable="true"><span class="block-input">block name</span></div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-pen);">Pen</div>
+            <div class="blocks">
+                <div class="block pen" draggable="true">Erase all</div>
+                <div class="block pen" draggable="true">Stamp</div>
+                <div class="block pen" draggable="true">Pen down</div>
+                <div class="block pen" draggable="true">Pen up</div>
+                <div class="block pen" draggable="true">Set pen color to <span class="block-input" style="background-color: #ff0000; width: 20px;"></span></div>
+                <div class="block pen" draggable="true">Change pen color by <span class="block-input">10</span></div>
+                <div class="block pen" draggable="true">Set pen color to <span class="block-input">0</span></div>
+                <div class="block pen" draggable="true">Change pen shade by <span class="block-input">10</span></div>
+                <div class="block pen" draggable="true">Set pen shade to <span class="block-input">50</span></div>
+                <div class="block pen" draggable="true">Change pen size by <span class="block-input">1</span></div>
+                <div class="block pen" draggable="true">Set pen size to <span class="block-input">1</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="workspace">
+            <h3>Code Workspace for <span id="current-sprite-name">Sprite 1</span></h3>
+            <div class="drop-zone">
+                <!-- This is where the sprite-specific blocks will be dropped -->
+            </div>
+        </div>
+        
+        <div class="sprite-area">
+            <div class="tabs">
+                <div class="tab active" data-tab="sprites">Sprites</div>
+                <div class="tab" data-tab="costumes">Costumes</div>
+                <div class="tab" data-tab="sounds">Sounds</div>
+            </div>
+            
+            <div class="tab-content active" id="sprites-tab">
+                <div class="sprites">
+                    <div class="sprite active" data-name="Sprite 1">
+                        <canvas width="60" height="60"></canvas>
+                        <div>Sprite 1</div>
+                    </div>
+                    
+                    <div class="sprite" data-name="Sprite 2">
+                        <canvas width="60" height="60"></canvas>
+                        <div>Sprite 2</div>
+                    </div>
+                    
+                    <div class="sprite" data-name="Sprite 3">
+                        <canvas width="60" height="60"></canvas>
+                        <div>Sprite 3</div>
+                    </div>
+                    
+                    <div class="sprite add-sprite">
+                        <div>+</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="costumes-tab">
+                <div class="toolbar">
+                    <button id="new-costume">New Costume</button>
+                    <button id="upload-costume">Upload</button>
+                    <button id="paint-costume">Paint</button>
+                </div>
+                <div class="costumes">
+                    <div class="costume active" data-name="costume1">
+                        <canvas width="60" height="60"></canvas>
+                        <div>costume1</div>
+                    </div>
+                    <div class="costume" data-name="costume2">
+                        <canvas width="60" height="60"></canvas>
+                        <div>costume2</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="sounds-tab">
+                <div class="toolbar">
+                    <button id="new-sound">New Sound</button>
+                    <button id="upload-sound">Upload</button>
+                    <button id="record-sound">Record</button>
+                </div>
+                <div class="sounds">
+                    <div class="sound-item">
+                        <div>meow</div>
+                        <div>
+                            <button class="play-sound">▶</button>
+                            <button class="delete-sound">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="sound-item">
+                        <div>pop</div>
+                        <div>
+                            <button class="play-sound">▶</button>
+                            <button class="delete-sound">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="property-panel">
+        <canvas class="preview-canvas" id="preview-canvas" width="240" height="180"></canvas>
+        <h3>Sprite Properties</h3>
+        
+        <div class="property">
+            <label class="property-label">Name</label>
+            <input type="text" class="property-input" id="sprite-name" value="Sprite 1">
+        </div>
+        
+        <div class="property">
+            <label class="property-label">X Position</label>
+            <input type="number" class="property-input" id="sprite-x" value="0">
+        </div>
+        
+        <div class="property">
+            <label class="property-label">Y Position</label>
+            <input type="number" class="property-input" id="sprite-y" value="0">
+        </div>
+        
+        <div class="property">
+            <label class="property-label">Size (%)</label>
+            <input type="number" class="property-input" id="sprite-size" value="100">
+        </div>
+        
+        <div class="property">
+            <label class="property-label">Direction</label>
+            <input type="number" class="property-input" id="sprite-direction" value="90" min="0" max="359">
+        </div>
+        
+        <div class="property">
+            <label class="property-label">Rotation Style</label>
+            <select class="property-input" id="sprite-rotation-style">
+                <option value="all-around">All around</option>
+                <option value="left-right">Left-right</option>
+                <option value="dont-rotate">Don't rotate</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="footer">Better Ocelot IDE - An improved version of Ocelot IDE by StarSubject</div>
+
+    <!-- Canvas for running sprites -->
+    <div id="canvas-container" class="editor-modal">
+        <div class="editor-content">
+            <button id="close-canvas" class="editor-close">X</button>
+            <h2 style="color: var(--accent-color); text-align: center;">Project Running</h2>
+            <canvas id="project-canvas" width="480" height="360" style="display: block; margin: 20px auto; background-color: white; border-radius: 5px;"></canvas>
+        </div>
+    </div>
+    
+    <!-- About Us Modal -->
+    <div id="about-modal" class="editor-modal">
+        <div class="editor-content" style="max-width: 600px;">
+            <button id="close-about" class="editor-close">X</button>
+            <h2 style="color: var(--accent-color); text-align: center;">About Better Ocelot IDE</h2>
+            <div style="color: var(--text-color); line-height: 1.6;">
+                <p>Better Ocelot IDE is an improved version of the original Ocelot IDE created by StarSubject.</p>
+                <p>This project aims to enhance the features and user experience of the original Ocelot IDE, which was inspired by Scratch.</p>
+                <p><strong>Original Author:</strong> <a href="https://github.com/starsubject" style="color: var(--accent-color);">starsubject</a> on GitHub, <a href="https://scratch.mit.edu/users/starsubject" style="color: var(--accent-color);">StarSubject</a> on Scratch</p>
+                <p><strong>Original Project:</strong> <a href="https://github.com/starsubject/ocelot-ide" style="color: var(--accent-color);">Ocelot IDE</a></p>
+                <p><strong>Improvements:</strong></p>
+                <ul style="padding-left: 20px;">
+                    <li>Dark theme UI</li>
+                    <li>Enhanced drag and drop functionality</li>
+                    <li>Interactive canvas for running projects</li>
+                    <li>Block inputs and endings for control blocks</li>
+                    <li>Complete implementation of Scratch blocks</li>
+                    <li>Costume and sound editor</li>
+                    <li>Real-time preview canvas</li>
+                    <li>Sprite property panel</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Costume Paint Editor -->
+    <div id="paint-editor" class="editor-modal">
+        <div class="editor-content">
+            <button id="close-paint" class="editor-close">X</button>
+            <h2 style="color: var(--accent-color); text-align: center;">Paint Editor</h2>
+            
+            <div class="painter-tools">
+                <div class="painter-tool active" data-tool="brush">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M20.71 5.63l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-10.84 10.84c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0l10.84-10.84c.39-.39.39-1.02 0-1.41zM3 21v-2.13l8.27-8.27 2.13 2.13-8.27 8.27h-2.13z"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="line">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M19 13H5v-2h14v2z"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="rect">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M19 5H5v14h14V5zm-2 12H7V7h10v10z"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="circle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <circle cx="12" cy="12" r="8"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="text">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M5 4v3h5.5v12h3V7H19V4z"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="eraser">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M17.2 8.8L15.4 7l2.8-2.8 1.8 1.8L17.2 8.8zM14 7.2L6.8 14.4c-.4.4-.4 1 0 1.4l2.8 2.8c.4.4 1 .4 1.4 0L18.4 11l-4.4-3.8z"/>
+                    </svg>
+                </div>
+                <div class="painter-tool" data-tool="fill">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                        <path d="M7 14l5-5 5 5H7z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <canvas class="painter-canvas" id="paint-canvas" width="400" height="300"></canvas>
+            
+            <div class="color-picker">
+                <div class="color-option active" style="background-color: #000000;"></div>
+                <div class="color-option" style="background-color: #ff0000;"></div>
+                <div class="color-option" style="background-color: #00ff00;"></div>
+                <div class="color-option" style="background-color: #0000ff;"></div>
+                <div class="color-option" style="background-color: #ffff00;"></div>
+                <div class="color-option" style="background-color: #ff00ff;"></div>
+                <div class="color-option" style="background-color: #00ffff;"></div>
+                <div class="color-option" style="background-color: #ffffff;"></div>
+                <div class="color-option" style="background-color: #ff8800;"></div>
+                <div class="color-option" style="background-color: #8800ff;"></div>
+                <div class="color-option" style="background-color: #00ff88;"></div>
+                <div class="color-option" style="background-color: #888888;"></div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="save-costume" style="background-color: var(--accent-color); border: none; color: white; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Save Costume</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store sprites and their scripts
+        const sprites = {
+            'Sprite 1': {
+                scripts: [],
+                costumes: ['costume1', 'costume2'],
+                activeCostume: 'costume1',
+                sounds: ['meow', 'pop'],
+                x: 0,
+                y: 0,
+                size: 100,
+                direction: 90,
+                rotationStyle: 'all-around',
+                visible: true
+            },
+            'Sprite 2': {
+                scripts: [],
+                costumes: ['costume1'],
+                activeCostume: 'costume1',
+                sounds: ['pop'],
+                x: 50,
+                y: 50,
+                size: 100,
+                direction: 90,
+                rotationStyle: 'all-around',
+                visible: true
+            },
+            'Sprite 3': {
+                scripts: [],
+                costumes: ['costume1'],
+                activeCostume: 'costume1',
+                sounds: [],
+                x: -50,
+                y: -50,
+                size: 100,
+                direction: 90,
+                rotationStyle: 'all-around',
+                visible: true
+            }
+        };
+        
+        let activeSprite = 'Sprite 1';
+        let paintTool = 'brush';
+        let paintColor = '#000000';
+        let isPainting = false;
+        let startX, startY;
+        
+        // Initialize canvases for sprites and costumes
+        initCanvases();
+        
+        // Initialize preview canvas
+        updatePreviewCanvas();
+        
+        // Toggle block categories
+        document.querySelectorAll('.category-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const blocks = header.nextElementSibling;
+                blocks.style.display = blocks.style.display === 'none' ? 'flex' : 'none';
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Deactivate all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                // Activate clicked tab
+                tab.classList.add('active');
+                const tabName = tab.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+        
+        // Sprite selection
+        document.querySelectorAll('.sprite').forEach(sprite => {
+            if (!sprite.classList.contains('add-sprite')) {
+                sprite.addEventListener('click', () => {
+                    selectSprite(sprite);
+                });
+            }
+        });
+        
+        // Add sprite button
+        document.querySelector('.add-sprite').addEventListener('click', () => {
+            createNewSprite();
+        });
+        
+        function selectSprite(spriteElement) {
+            // Update UI
+            document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
+            spriteElement.classList.add('active');
+            
+            // Update active sprite
+            activeSprite = spriteElement.getAttribute('data-name');
+            document.getElementById('current-sprite-name').textContent = activeSprite;
+            
+            // Load sprite's scripts
+            loadSpriteScripts();
+            
+            // Update sprite properties panel
+            updateSpriteProperties();
+        }
+        
+        function createNewSprite() {
+            const spriteCount = Object.keys(sprites).length + 1;
+            const spriteName = `Sprite ${spriteCount}`;
+            
+            // Create new sprite data
+            sprites[spriteName] = {
+                scripts: [],
+                costumes: ['costume1'],
+                activeCostume: 'costume1',
+                sounds: [],
+                x: 0,
+                y: 0,
+                size: 100,
+                direction: 90,
+                rotationStyle: 'all-around',
+                visible: true
+            };
+            
+            // Create sprite element
+            const newSprite = document.createElement('div');
+            newSprite.className = 'sprite';
+            newSprite.setAttribute('data-name', spriteName);
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 60;
+            canvas.height = 60;
+            
+            const label = document.createElement('div');
+            label.textContent = spriteName;
+            
+            newSprite.appendChild(canvas);
+            newSprite.appendChild(label);
+            
+            // Add to DOM before the add button
+            const addButton = document.querySelector('.add-sprite');
+            addButton.parentNode.insertBefore(newSprite, addButton);
+            
+            // Initialize sprite's canvas
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = getColorForSprite(spriteName);
+            ctx.beginPath();
+            ctx.arc(30, 30, 20, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add click event
+            newSprite.addEventListener('click', () => {
+                selectSprite(newSprite);
+            });
+            
+            // Select the new sprite
+            selectSprite(newSprite);
+        }
+        
+        function loadSpriteScripts() {
+            const dropZone = document.querySelector('.drop-zone');
+            dropZone.innerHTML = '';
+            
+            if (sprites[activeSprite].scripts.length > 0) {
+                sprites[activeSprite].scripts.forEach(scriptHtml => {
+                    const scriptElement = document.createElement('div');
+                    scriptElement.innerHTML = scriptHtml;
+                    dropZone.appendChild(scriptElement.firstChild);
+                    setupWorkspaceBlockDrag(scriptElement.firstChild);
+                });
+            }
+        }
+        
+        function updateSpriteProperties() {
+            const sprite = sprites[activeSprite];
+            
+            document.getElementById('sprite-name').value = activeSprite;
+            document.getElementById('sprite-x').value = sprite.x;
+            document.getElementById('sprite-y').value = sprite.y;
+            document.getElementById('sprite-size').value = sprite.size;
+            document.getElementById('sprite-direction').value = sprite.direction;
+            document.getElementById('sprite-rotation-style').value = sprite.rotationStyle;
+            
+            // No need to update rotation handle anymore
+            
+            // Update preview canvas
+            updatePreviewCanvas();
+        }
+        
+        // Property panel event listeners
+        document.getElementById('sprite-name').addEventListener('change', function() {
+            const newName = this.value.trim();
+            if (newName && newName !== activeSprite) {
+                // Update sprites object
+                sprites[newName] = sprites[activeSprite];
+                delete sprites[activeSprite];
+                
+                // Update UI
+                const spriteElement = document.querySelector(`.sprite.active`);
+                spriteElement.setAttribute('data-name', newName);
+                spriteElement.querySelector('div').textContent = newName;
+                
+                // Update current sprite reference
+                activeSprite = newName;
+                document.getElementById('current-sprite-name').textContent = newName;
+            } else {
+                this.value = activeSprite; // Reset if invalid
+            }
+        });
+        
+        document.getElementById('sprite-x').addEventListener('change', function() {
+            sprites[activeSprite].x = Number(this.value);
+            updatePreviewCanvas();
+        });
+        
+        document.getElementById('sprite-y').addEventListener('change', function() {
+            sprites[activeSprite].y = Number(this.value);
+            updatePreviewCanvas();
+        });
+        
+        document.getElementById('sprite-size').addEventListener('change', function() {
+            sprites[activeSprite].size = Number(this.value);
+            updatePreviewCanvas();
+        });
+        
+        document.getElementById('sprite-direction').addEventListener('change', function() {
+            const direction = Number(this.value) % 360;
+            sprites[activeSprite].direction = direction;
+            
+            // Update rotation handle
+            const handle = document.querySelector('.rotation-handle');
+            handle.style.transform = `translateX(-50%) rotate(${direction - 90}deg)`;
+            
+            updatePreviewCanvas();
+        });
+        
+        document.getElementById('sprite-rotation-style').addEventListener('change', function() {
+            sprites[activeSprite].rotationStyle = this.value;
+            updatePreviewCanvas();
+        });
+        
+        // Direction input functionality
+        document.getElementById('sprite-direction').addEventListener('input', function() {
+            let angle = Number(this.value) % 360;
+            if (angle < 0) angle += 360;
+            
+            sprites[activeSprite].direction = angle;
+            this.value = angle;
+            
+            updatePreviewCanvas();
+        });
+        
+        // Menu button functionality
+        document.querySelectorAll('.menu button').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.textContent.trim();
+                
+                if (action === 'Run ▶') {
+                    runProject();
+                } else if (action === 'File') {
+                    const options = ['New Project', 'Save Project', 'Load Project', 'Export'];
+                    showDropdown(button, options);
+                } else if (action === 'Edit') {
+                    const options = ['Undo', 'Redo', 'Copy', 'Paste', 'Delete'];
+                    showDropdown(button, options);
+                } else if (action === 'Help') {
+                    const options = ['Documentation', 'Tutorials', 'About Us'];
+                    showDropdown(button, options);
+                }
+            });
+        });
+        
+        // Function to show dropdown menu
+        function showDropdown(button, options) {
+            // Remove any existing dropdowns
+            const existingDropdown = document.querySelector('.dropdown-menu');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            
+            // Create dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown-menu';
+            dropdown.style.position = 'absolute';
+            dropdown.style.backgroundColor = 'var(--sidebar-bg)';
+            dropdown.style.border = '1px solid var(--border-color)';
+            dropdown.style.borderRadius = '4px';
+            dropdown.style.padding = '5px 0';
+            dropdown.style.zIndex = '100';
+            
+            // Calculate position
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = `${rect.bottom}px`;
+            dropdown.style.left = `${rect.left}px`;
+            
+            // Add options
+            options.forEach(option => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = option;
+                item.style.padding = '8px 15px';
+                item.style.cursor = 'pointer';
+                
+                item.addEventListener('mouseover', () => {
+                    item.style.backgroundColor = 'var(--block-bg)';
+                });
+                
+                item.addEventListener('mouseout', () => {
+                    item.style.backgroundColor = '';
+                });
+                
+                item.addEventListener('click', () => {
+                    handleMenuOption(option);
+                    dropdown.remove();
+                });
+                
+                dropdown.appendChild(item);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target) && e.target !== button) {
+                    dropdown.remove();
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+            
+            document.body.appendChild(dropdown);
+        }
+        
+        // Handle menu option selection
+        function handleMenuOption(option) {
+            switch(option) {
+                case 'New Project':
+                    if(confirm('Start a new project? Current project will be lost.')) {
+                        resetProject();
+                    }
+                    break;
+                case 'Save Project':
+                    saveProject();
+                    break;
+                case 'Load Project':
+                    loadProject();
+                    break;
+                case 'Export':
+                    exportProject();
+                    break;
+                case 'Undo':
+                    // Implement undo functionality
+                    alert('Undo feature will be implemented in a future update.');
+                    break;
+                case 'Redo':
+                    // Implement redo functionality
+                    alert('Redo feature will be implemented in a future update.');
+                    break;
+                case 'Copy':
+                    // Implement copy functionality
+                    alert('Copy feature will be implemented in a future update.');
+                    break;
+                case 'Paste':
+                    // Implement paste functionality
+                    alert('Paste feature will be implemented in a future update.');
+                    break;
+                case 'Delete':
+                    // Implement delete functionality
+                    alert('Delete feature will be implemented in a future update.');
+                    break;
+                case 'Documentation':
+                    alert('Documentation will be available in a future update.');
+                    break;
+                case 'Tutorials':
+                    alert('Tutorials will be available in a future update.');
+                    break;
+                case 'About Us':
+                    showAboutModal();
+                    break;
+            }
+        }
+        
+        function resetProject() {
+            // Reset sprites
+            const spritesContainer = document.querySelector('.sprites');
+            spritesContainer.innerHTML = `
+                <div class="sprite active" data-name="Sprite 1">
+                    <canvas width="60" height="60"></canvas>
+                    <div>Sprite 1</div>
+                </div>
+                <div class="sprite add-sprite">
+                    <div>+</div>
+                </div>
+            `;
+            
+            // Reset sprite data
+            sprites = {
+                'Sprite 1': {
+                    scripts: [],
+                    costumes: ['costume1', 'costume2'],
+                    activeCostume: 'costume1',
+                    sounds: ['meow', 'pop'],
+                    x: 0,
+                    y: 0,
+                    size: 100,
+                    direction: 90,
+                    rotationStyle: 'all-around',
+                    visible: true
+                }
+            };
+            
+            activeSprite = 'Sprite 1';
+            document.getElementById('current-sprite-name').textContent = activeSprite;
+            
+            // Clear workspace
+            document.querySelector('.drop-zone').innerHTML = '';
+            
+            // Initialize canvases
+            initCanvases();
+            
+            // Update sprite properties
+            updateSpriteProperties();
+            
+            // Reattach events
+            document.querySelector('.sprite:not(.add-sprite)').addEventListener('click', (e) => {
+                selectSprite(e.currentTarget);
+            });
+            
+            document.querySelector('.add-sprite').addEventListener('click', () => {
+                createNewSprite();
+            });
+        }
+        
+        // Show about modal
+        function showAboutModal() {
+            document.getElementById('about-modal').style.display = 'block';
+        }
+        
+        // Close about modal
+        document.getElementById('close-about').addEventListener('click', () => {
+            document.getElementById('about-modal').style.display = 'none';
+        });
+        
+        // Paint editor functionality
+        document.getElementById('paint-costume').addEventListener('click', () => {
+            const paintEditor = document.getElementById('paint-editor');
+            paintEditor.style.display = 'block';
+            
+            const canvas = document.getElementById('paint-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        document.getElementById('close-paint').addEventListener('click', () => {
+            document.getElementById('paint-editor').style.display = 'none';
+        });
+        
+        // Tool selection
+        document.querySelectorAll('.painter-tool').forEach(tool => {
+            tool.addEventListener('click', () => {
+                document.querySelectorAll('.painter-tool').forEach(t => t.classList.remove('active'));
+                tool.classList.add('active');
+                paintTool = tool.getAttribute('data-tool');
+            });
+        });
+        
+        // Color selection
+        document.querySelectorAll('.color-option').forEach(color => {
+            color.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(c => c.classList.remove('active'));
+                color.classList.add('active');
+                paintColor = color.style.backgroundColor;
+            });
+        });
+        
+        // Paint canvas functionality
+        const paintCanvas = document.getElementById('paint-canvas');
+        const paintCtx = paintCanvas.getContext('2d');
+        
+        paintCanvas.addEventListener('mousedown', (e) => {
+            isPainting = true;
+            startX = e.offsetX;
+            startY = e.offsetY;
+            
+            if (paintTool === 'brush') {
+                paintCtx.beginPath();
+                paintCtx.moveTo(startX, startY);
+                paintCtx.lineWidth = 5;
+                paintCtx.lineCap = 'round';
+                paintCtx.strokeStyle = paintColor;
+            }
+        });
+        
+        paintCanvas.addEventListener('mousemove', (e) => {
+            if (!isPainting) return;
+            
+            if (paintTool === 'brush') {
+                paintCtx.lineTo(e.offsetX, e.offsetY);
+                paintCtx.stroke();
+            }
+        });
+        
+        paintCanvas.addEventListener('mouseup', (e) => {
+            if (paintTool === 'line') {
+                paintCtx.beginPath();
+                paintCtx.moveTo(startX, startY);
+                paintCtx.lineTo(e.offsetX, e.offsetY);
+                paintCtx.strokeStyle = paintColor;
+                paintCtx.lineWidth = 5;
+                paintCtx.stroke();
+            } else if (paintTool === 'rect') {
+                paintCtx.strokeStyle = paintColor;
+                paintCtx.lineWidth = 5;
+                paintCtx.strokeRect(
+                    startX, 
+                    startY, 
+                    e.offsetX - startX, 
+                    e.offsetY - startY
+                );
+            } else if (paintTool === 'circle') {
+                const radiusX = Math.abs(e.offsetX - startX);
+                const radiusY = Math.abs(e.offsetY - startY);
+                const radius = Math.max(radiusX, radiusY);
+                
+                paintCtx.beginPath();
+                paintCtx.arc(startX, startY, radius, 0, Math.PI * 2);
+                paintCtx.strokeStyle = paintColor;
+                paintCtx.lineWidth = 5;
+                paintCtx.stroke();
+            } else if (paintTool === 'text') {
+                const text = prompt('Enter text:', 'Text');
+                if (text) {
+                    paintCtx.font = '20px Arial';
+                    paintCtx.fillStyle = paintColor;
+                    paintCtx.fillText(text, startX, startY);
+                }
+            } else if (paintTool === 'fill') {
+                // Simple fill (just fills entire canvas for demo)
+                paintCtx.fillStyle = paintColor;
+                paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+            } else if (paintTool === 'eraser') {
+                const radius = 10;
+                paintCtx.fillStyle = 'white';
+                paintCtx.beginPath();
+                paintCtx.arc(e.offsetX, e.offsetY, radius, 0, Math.PI * 2);
+                paintCtx.fill();
+            }
+            
+            isPainting = false;
+        });
+        
+        paintCanvas.addEventListener('mouseleave', () => {
+            isPainting = false;
+        });
+        
+        // Save costume
+        document.getElementById('save-costume').addEventListener('click', () => {
+            const costumeCount = document.querySelectorAll('.costume').length + 1;
+            const costumeName = `costume${costumeCount}`;
+            
+            // Add to sprite's costumes
+            sprites[activeSprite].costumes.push(costumeName);
+            
+            // Create new costume element
+            const newCostume = document.createElement('div');
+            newCostume.className = 'costume';
+            newCostume.setAttribute('data-name', costumeName);
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 60;
+            canvas.height = 60;
+            
+            // Draw the costume on the smaller canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(
+                paintCanvas, 
+                0, 0, paintCanvas.width, paintCanvas.height,
+                0, 0, 60, 60
+            );
+            
+            const label = document.createElement('div');
+            label.textContent = costumeName;
+            
+            newCostume.appendChild(canvas);
+            newCostume.appendChild(label);
+            
+            // Add to DOM
+            document.querySelector('.costumes').appendChild(newCostume);
+            
+            // Add click event
+            newCostume.addEventListener('click', () => {
+                selectCostume(newCostume);
+            });
+            
+            // Close paint editor
+            document.getElementById('paint-editor').style.display = 'none';
+        });
+        
+        // Costume selection
+        document.querySelectorAll('.costume').forEach(costume => {
+            costume.addEventListener('click', () => {
+                selectCostume(costume);
+            });
+        });
+        
+        function selectCostume(costumeElement) {
+            document.querySelectorAll('.costume').forEach(c => c.classList.remove('active'));
+            costumeElement.classList.add('active');
+            
+            const costumeName = costumeElement.getAttribute('data-name');
+            sprites[activeSprite].activeCostume = costumeName;
+            
+            updatePreviewCanvas();
+        }
+        
+        // Save project functionality
+        function saveProject() {
+            // Save scripts for the current sprite
+            saveSpriteScripts();
+            
+            // Save all project data
+            const projectData = {
+                sprites: sprites
+            };
+            
+            const projectJson = JSON.stringify(projectData);
+            localStorage.setItem('betterOcelotProject', projectJson);
+            
+            alert('Project saved successfully!');
+        }
+        
+        function saveSpriteScripts() {
+            const scripts = Array.from(document.querySelectorAll('.drop-zone > .block')).map(block => {
+                // Get outerHTML of block and any connected blocks for this script
+                return getScriptHtml(block);
+            });
+            
+            sprites[activeSprite].scripts = scripts;
+        }
+        
+        function getScriptHtml(block) {
+            // Get HTML of a block including its container if it has one
+            const container = block.parentElement.classList.contains('block-container') 
+                ? block.parentElement 
+                : null;
+                
+            if (container) {
+                return container.outerHTML;
+            } else {
+                return block.outerHTML;
+            }
+        }
+        
+        // Load project functionality
+        function loadProject() {
+            const projectJson = localStorage.getItem('betterOcelotProject');
+            if (!projectJson) {
+                alert('No saved project found.');
+                return;
+            }
+            
+            try {
+                const projectData = JSON.parse(projectJson);
+                
+                // Load sprites
+                sprites = projectData.sprites;
+                
+                // Recreate sprite elements
+                const spritesContainer = document.querySelector('.sprites');
+                spritesContainer.innerHTML = ''; // Clear existing sprites
+                
+                Object.keys(sprites).forEach(spriteName => {
+                    const sprite = document.createElement('div');
+                    sprite.className = 'sprite';
+                    if (spriteName === activeSprite) {
+                        sprite.classList.add('active');
+                    }
+                    sprite.setAttribute('data-name', spriteName);
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 60;
+                    canvas.height = 60;
+                    
+                    const label = document.createElement('div');
+                    label.textContent = spriteName;
+                    
+                    sprite.appendChild(canvas);
+                    sprite.appendChild(label);
+                    spritesContainer.appendChild(sprite);
+                    
+                    // Add click event
+                    sprite.addEventListener('click', () => {
+                        selectSprite(sprite);
+                    });
+                    
+                    // Draw sprite
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = getColorForSprite(spriteName);
+                    ctx.beginPath();
+                    ctx.arc(30, 30, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Add the "+ sprite" button
+                const addButton = document.createElement('div');
+                addButton.className = 'sprite add-sprite';
+                addButton.innerHTML = '<div>+</div>';
+                spritesContainer.appendChild(addButton);
+                
+                addButton.addEventListener('click', () => {
+                    createNewSprite();
+                });
+                
+                // Select the first sprite
+                activeSprite = Object.keys(sprites)[0];
+                document.getElementById('current-sprite-name').textContent = activeSprite;
+                
+                // Load scripts for the active sprite
+                loadSpriteScripts();
+                
+                // Update sprite properties
+                updateSpriteProperties();
+                
+                alert('Project loaded successfully!');
+            } catch(e) {
+                alert('Error loading project: ' + e.message);
+                console.error(e);
+            }
+        }
+        
+        // Export project functionality
+        function exportProject() {
+            // Save scripts for the current sprite
+            saveSpriteScripts();
+            
+            const projectData = {
+                sprites: sprites
+            };
+            
+            const projectJson = JSON.stringify(projectData, null, 2);
+            
+            // Create a download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(new Blob([projectJson], {type: 'application/json'}));
+            downloadLink.download = 'ocelot_project.json';
+            
+            // Append to body, click and remove
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+        
+        // Run the project
+        function runProject() {
+            // Save scripts for the current sprite first
+            saveSpriteScripts();
+            
+            // Show canvas
+            document.getElementById('canvas-container').style.display = 'block';
+            
+            // Get the canvas and context
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw all sprites
+            Object.keys(sprites).forEach(spriteName => {
+                const sprite = sprites[spriteName];
+                if (sprite.visible) {
+                    // Calculate position (center of canvas + sprite coordinates)
+                    const x = canvas.width / 2 + sprite.x;
+                    const y = canvas.height / 2 - sprite.y; // Y is inverted in canvas
+                    
+                    // Calculate size
+                    const size = 40 * (sprite.size / 100);
+                    
+                    // Save context for rotation
+                    ctx.save();
+                    ctx.translate(x, y);
+                    
+                    // Apply rotation based on rotation style
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.rotate((sprite.direction - 90) * Math.PI / 180);
+                    } else if (sprite.rotationStyle === 'left-right') {
+                        // Flip horizontally if facing left
+                        if (sprite.direction > 180 && sprite.direction < 360) {
+                            ctx.scale(-1, 1);
+                        }
+                    }
+                    
+                    // Draw sprite
+                    ctx.fillStyle = getColorForSprite(spriteName);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw direction indicator
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                    
+                    // Draw sprite name
+                    ctx.fillStyle = 'black';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(spriteName, x, y + size + 20);
+                }
+            });
+            
+            // Execute the scripts for all sprites
+            Object.keys(sprites).forEach(spriteName => {
+                executeScripts(spriteName);
+            });
+        }
+        
+        // Close canvas button
+        document.getElementById('close-canvas').addEventListener('click', () => {
+            document.getElementById('canvas-container').style.display = 'none';
+        });
+        
+        // Execute scripts for a sprite
+        function executeScripts(spriteName) {
+            const sprite = sprites[spriteName];
+            
+            sprite.scripts.forEach(scriptHtml => {
+                // Create a temporary element to parse the HTML
+                const tempEl = document.createElement('div');
+                tempEl.innerHTML = scriptHtml;
+                const blocks = tempEl.querySelectorAll('.block');
+                
+                // Execute each block with animation
+                blocks.forEach((block, index) => {
+                    setTimeout(() => {
+                        executeBlock(block, spriteName);
+                    }, index * 1000); // 1 second delay between blocks
+                });
+            });
+        }
+        
+        // Execute a single block
+        function executeBlock(block, spriteName) {
+            const sprite = sprites[spriteName];
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Determine block type and action
+            if (block.classList.contains('motion')) {
+                if (block.textContent.includes('Move')) {
+                    // Extract steps value from the block's input
+                    const stepsInput = block.querySelector('.block-input');
+                    const steps = stepsInput ? parseInt(stepsInput.textContent) : 10;
+                    
+                    // Calculate new position based on direction
+                    const angle = sprite.direction * (Math.PI / 180);
+                    sprite.x += steps * Math.cos(angle);
+                    sprite.y += steps * Math.sin(angle);
+                    
+                    // Redraw canvas
+                    redrawCanvas();
+                } else if (block.textContent.includes('Turn right')) {
+                    const degreesInput = block.querySelector('.block-input');
+                    const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
+                    
+                    sprite.direction = (sprite.direction + degrees) % 360;
+                    redrawCanvas();
+                } else if (block.textContent.includes('Turn left')) {
+                    const degreesInput = block.querySelector('.block-input');
+                    const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
+                    
+                    sprite.direction = (sprite.direction - degrees + 360) % 360;
+                    redrawCanvas();
+                } else if (block.textContent.includes('Go to x:')) {
+                    const inputs = block.querySelectorAll('.block-input');
+                    if (inputs.length >= 2) {
+                        sprite.x = parseInt(inputs[0].textContent);
+                        sprite.y = parseInt(inputs[1].textContent);
+                        redrawCanvas();
+                    }
+                }
+            } else if (block.classList.contains('looks')) {
+                if (block.textContent.includes('Say')) {
+                    const textInput = block.querySelector('.block-input');
+                    const text = textInput ? textInput.textContent : 'Hello!';
+                    
+                    // Calculate position
+                    const x = canvas.width / 2 + sprite.x;
+                    const y = canvas.height / 2 - sprite.y;
+                    
+                    // Draw speech bubble
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.ellipse(x + 60, y - 30, 70, 30, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Draw speech bubble tail
+                    ctx.beginPath();
+                    ctx.moveTo(x + 20, y - 10);
+                    ctx.quadraticCurveTo(x + 30, y - 20, x + 40, y - 30);
+                    ctx.stroke();
+                    ctx.fill();
+                    
+                    // Draw text
+                    ctx.fillStyle = 'black';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(text, x + 60, y - 25);
+                } else if (block.textContent.includes('Change size by')) {
+                    const sizeInput = block.querySelector('.block-input');
+                    const sizeChange = sizeInput ? parseInt(sizeInput.textContent) : 10;
+                    
+                    sprite.size += sizeChange;
+                    if (sprite.size < 1) sprite.size = 1;
+                    
+                    redrawCanvas();
+                } else if (block.textContent.includes('Set size to')) {
+                    const sizeInput = block.querySelector('.block-input');
+                    const newSize = sizeInput ? parseInt(sizeInput.textContent) : 100;
+                    
+                    sprite.size = newSize;
+                    if (sprite.size < 1) sprite.size = 1;
+                    
+                    redrawCanvas();
+                } else if (block.textContent.includes('Hide')) {
+                    sprite.visible = false;
+                    redrawCanvas();
+                } else if (block.textContent.includes('Show')) {
+                    sprite.visible = true;
+                    redrawCanvas();
+                }
+            } else if (block.classList.contains('sound')) {
+                if (block.textContent.includes('Play sound')) {
+                    // Create a beep sound (simplified implementation)
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 note
+                        oscillator.connect(audioCtx.destination);
+                        oscillator.start();
+                        setTimeout(() => oscillator.stop(), 500); // Stop after 0.5 seconds
+                    } catch (e) {
+                        console.error('Web Audio API is not supported in this browser');
+                    }
+                }
+            } else if (block.classList.contains('control')) {
+                if (block.textContent.includes('Wait')) {
+                    // Wait is handled by the setTimeout delay in the executeScripts function
+                }
+            }
+        }
+        
+        function redrawCanvas() {
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw all sprites
+            Object.keys(sprites).forEach(spriteName => {
+                const sprite = sprites[spriteName];
+                if (sprite.visible) {
+                    // Calculate position
+                    const x = canvas.width / 2 + sprite.x;
+                    const y = canvas.height / 2 - sprite.y;
+                    
+                    // Calculate size
+                    const size = 40 * (sprite.size / 100);
+                    
+                    // Save context for rotation
+                    ctx.save();
+                    ctx.translate(x, y);
+                    
+                    // Apply rotation based on rotation style
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.rotate((sprite.direction - 90) * Math.PI / 180);
+                    } else if (sprite.rotationStyle === 'left-right') {
+                        // Flip horizontally if facing left
+                        if (sprite.direction > 180 && sprite.direction < 360) {
+                            ctx.scale(-1, 1);
+                        }
+                    }
+                    
+                    // Draw sprite
+                    ctx.fillStyle = getColorForSprite(spriteName);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw direction indicator
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                    
+                    // Draw sprite name
+                    ctx.fillStyle = 'black';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(spriteName, x, y + size + 20);
+                }
+            });
+            
+            // Update preview canvas too
+            updatePreviewCanvas();
+        }
+        
+        // Update the preview canvas to show all sprites
+        function updatePreviewCanvas() {
+            const canvas = document.getElementById('preview-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw all sprites
+            Object.keys(sprites).forEach(spriteName => {
+                const sprite = sprites[spriteName];
+                if (sprite.visible) {
+                    // Calculate position (center of canvas + sprite coordinates)
+                    const x = canvas.width / 2 + sprite.x;
+                    const y = canvas.height / 2 - sprite.y; // Y is inverted in canvas
+                    
+                    // Calculate size
+                    const size = 20 * (sprite.size / 100);
+                    
+                    // Save context for rotation
+                    ctx.save();
+                    ctx.translate(x, y);
+                    
+                    // Apply rotation based on rotation style
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.rotate((sprite.direction - 90) * Math.PI / 180);
+                    } else if (sprite.rotationStyle === 'left-right') {
+                        // Flip horizontally if facing left
+                        if (sprite.direction > 180 && sprite.direction < 360) {
+                            ctx.scale(-1, 1);
+                        }
+                    }
+                    
+                    // Draw sprite
+                    ctx.fillStyle = getColorForSprite(spriteName);
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw direction indicator
+                    if (sprite.rotationStyle === 'all-around') {
+                        ctx.fillStyle = 'white';
+                        ctx.beginPath();
+                        ctx.arc(0, -size/2, size/5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                    
+                    // Add highlight for active sprite
+                    if (spriteName === activeSprite) {
+                        ctx.strokeStyle = 'var(--accent-color)';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x - size - 5, y - size - 5, (size + 5) * 2, (size + 5) * 2);
+                    }
+                }
+            });
+        }
+        
+        // Get a color for a sprite based on its name
+        function getColorForSprite(name) {
+            // Simple hash function to generate a color
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            const hue = hash % 360;
+            return `hsl(${hue}, 80%, 50%)`;
+        }
+        
+        // Initialize canvases for sprites and costumes
+        function initCanvases() {
+            // Initialize sprite canvases
+            document.querySelectorAll('.sprite:not(.add-sprite)').forEach(sprite => {
+                const canvas = sprite.querySelector('canvas');
+                const ctx = canvas.getContext('2d');
+                const spriteName = sprite.getAttribute('data-name');
+                
+                ctx.fillStyle = getColorForSprite(spriteName);
+                ctx.beginPath();
+                ctx.arc(30, 30, 20, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Initialize costume canvases
+            document.querySelectorAll('.costume').forEach(costume => {
+                const canvas = costume.querySelector('canvas');
+                const ctx = canvas.getContext('2d');
+                const costumeName = costume.getAttribute('data-name');
+                
+                // For demo, just draw colored squares for costumes
+                if (costumeName === 'costume1') {
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(10, 10, 40, 40);
+                } else if (costumeName === 'costume2') {
+                    ctx.fillStyle = 'blue';
+                    ctx.beginPath();
+                    ctx.arc(30, 30, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+        
+        // Drag and Drop functionality
+        let draggedBlock = null;
+        
+        // Make blocks in the sidebar draggable
+        document.querySelectorAll('.sidebar .block, .sidebar .operator-block').forEach(block => {
+            block.setAttribute('draggable', 'true');
+            
+            block.addEventListener('dragstart', (e) => {
+                draggedBlock = block;
+                e.dataTransfer.setData('text/plain', block.textContent);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+        
+        // Make the drop zone accept drops
+        const dropZone = document.querySelector('.drop-zone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedBlock) {
+                e.dataTransfer.dropEffect = draggedBlock.parentNode.classList.contains('blocks') ? 'copy' : 'move';
+            }
+            dropZone.style.backgroundColor = '#383838';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '#282828';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#282828';
+            
+            // Process drop
+            processBlockDrop(e, dropZone);
+        });
+        
+        function processBlockDrop(e, dropZone) {
+            if (!draggedBlock) return;
+            
+            // Handle block inputs
+            if (draggedBlock.classList.contains('operator-block')) {
+                // Only drop operator blocks into inputs
+                const targetInput = findDropTarget(e.clientX, e.clientY, '.block-input');
+                if (targetInput) {
+                    // Clone the operator block
+                    const newBlock = draggedBlock.cloneNode(true);
+                    
+                    // Replace the input with the operator
+                    targetInput.innerHTML = '';
+                    targetInput.appendChild(newBlock);
+                    
+                    // Set up draggable for the new block
+                    newBlock.addEventListener('dragstart', (e) => {
+                        draggedBlock = newBlock;
+                        e.dataTransfer.setData('text/plain', newBlock.textContent);
+                        e.stopPropagation();
+                    });
+                }
+                return;
+            }
+            
+            // Handle normal blocks
+            if (draggedBlock.parentNode.classList.contains('blocks')) {
+                // Creating a new block from sidebar
+                const newBlock = draggedBlock.cloneNode(true);
+                newBlock.style.marginBottom = '5px';
+                
+                // Check if it's a block that needs an end block
+                if (
+                    (newBlock.classList.contains('control') && 
+                    (newBlock.textContent.includes('Repeat') || 
+                     newBlock.textContent.includes('Forever') || 
+                     newBlock.textContent.includes('If'))) && 
+                    !newBlock.classList.contains('block-end')
+                ) {
+                    // Create a container for this block and its end block
+                    const container = document.createElement('div');
+                    container.className = 'block-container';
+                    
+                    // Add the block to the container
+                    container.appendChild(newBlock);
+                    
+                    // Create the corresponding end block
+                    const endBlock = document.createElement('div');
+                    endBlock.className = `block control block-end`;
+                    
+                    // Determine the type of end block
+                    if (newBlock.textContent.includes('Forever')) {
+                        endBlock.textContent = 'End forever';
+                    } else if (newBlock.textContent.includes('Repeat') && !newBlock.textContent.includes('until')) {
+                        endBlock.textContent = 'End repeat';
+                    } else if (newBlock.textContent.includes('Repeat until')) {
+                        endBlock.textContent = 'End repeat until';
+                    } else if (newBlock.textContent.includes('If') && newBlock.textContent.includes('Else')) {
+                        endBlock.textContent = 'End if else';
+                    } else {
+                        endBlock.textContent = 'End if';
+                    }
+                    
+                    // Add the end block to the container
+                    container.appendChild(endBlock);
+                    
+                    // Add the container to the drop zone
+                    dropZone.appendChild(container);
+                    
+                    // Set up drag for the new block
+                    setupWorkspaceBlockDrag(newBlock);
+                } else if (!newBlock.classList.contains('block-end')) {
+                    // Add the single block to the drop zone
+                    dropZone.appendChild(newBlock);
+                    
+                    // Set up drag for the new block
+                    setupWorkspaceBlockDrag(newBlock);
+                }
+            } else if (draggedBlock.parentNode === dropZone || draggedBlock.closest('.drop-zone')) {
+                // Reordering existing blocks in the workspace
+                const y = e.clientY;
+                const blocks = Array.from(dropZone.querySelectorAll(':scope > .block, :scope > .block-container'));
+                
+                // Find the block to insert before
+                let insertBeforeBlock = null;
+                for (let i = 0; i < blocks.length; i++) {
+                    const block = blocks[i];
+                    const rect = block.getBoundingClientRect();
+                    const blockMiddle = rect.top + rect.height / 2;
+                    
+                    if (y < blockMiddle) {
+                        insertBeforeBlock = block;
+                        break;
+                    }
+                }
+                
+                // Get the block or container to move
+                const blockToMove = draggedBlock.classList.contains('block-container') 
+                    ? draggedBlock 
+                    : (draggedBlock.closest('.block-container') || draggedBlock);
+                
+                // Move the block
+                if (insertBeforeBlock) {
+                    dropZone.insertBefore(blockToMove, insertBeforeBlock);
+                } else {
+                    dropZone.appendChild(blockToMove);
+                }
+            }
+            
+            draggedBlock = null;
+        }
+        
+        function findDropTarget(x, y, selector) {
+            const elements = document.elementsFromPoint(x, y);
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i].matches(selector)) {
+                    return elements[i];
+                }
+            }
+            return null;
+        }
+        
+        // Make blocks in the workspace draggable
+        function setupWorkspaceBlockDrag(block) {
+            block.setAttribute('draggable', 'true');
+            
+            block.addEventListener('dragstart', (e) => {
+                draggedBlock = block;
+                e.dataTransfer.setData('text/plain', block.textContent);
+                e.dataTransfer.effectAllowed = 'move';
+                
+                // Delay to allow dragstart to complete
+                setTimeout(() => {
+                    block.style.opacity = '0.4';
+                }, 0);
+            });
+            
+            block.addEventListener('dragend', () => {
+                block.style.opacity = '1';
+                draggedBlock = null;
+            });
+            
+            // Make inputs accept operator blocks
+            block.querySelectorAll('.block-input').forEach(input => {
+                input.addEventListener('dragover', (e) => {
+                    if (draggedBlock && draggedBlock.classList.contains('operator-block')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        input.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                    }
+                });
+                
+                input.addEventListener('dragleave', () => {
+                    input.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                });
+                
+                input.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    input.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                    
+                    if (draggedBlock && draggedBlock.classList.contains('operator-block')) {
+                        // Clone the operator block
+                        const newBlock = draggedBlock.cloneNode(true);
+                        
+                        // Replace the input with the operator
+                        input.innerHTML = '';
+                        input.appendChild(newBlock);
+                        
+                        // Set up draggable for the new block
+                        newBlock.addEventListener('dragstart', (e) => {
+                            draggedBlock = newBlock;
+                            e.dataTransfer.setData('text/plain', newBlock.textContent);
+                            e.stopPropagation();
+                        });
+                    }
+                });
+            });
+            
+            // Make inputs editable on click
+            block.querySelectorAll('.block-input').forEach(input => {
+                if (!input.querySelector('.operator-block')) { // Don't make inputs that contain operators editable
+                    input.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        const currentValue = input.textContent;
+                        const newValue = prompt('Enter value:', currentValue);
+                        
+                        if (newValue !== null) {
+                            input.textContent = newValue;
+                        }
+                    });
+                }
+            });
+            
+            // Make dropdowns selectable
+            block.querySelectorAll('.block-dropdown').forEach(dropdown => {
+                dropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    // Define options based on dropdown content
+                    let options = [];
+                    
+                    if (dropdown.textContent.includes('costume')) {
+                        options = sprites[activeSprite].costumes;
+                    } else if (dropdown.textContent.includes('backdrop')) {
+                        options = ['backdrop1', 'backdrop2'];
+                    } else if (dropdown.textContent.includes('all around') || dropdown.textContent.includes('left-right') || dropdown.textContent.includes('don\'t rotate')) {
+                        options = ['all around', 'left-right', 'don\'t rotate'];
+                    } else if (dropdown.textContent.includes('front') || dropdown.textContent.includes('back')) {
+                        options = ['front', 'back'];
+                    } else if (dropdown.textContent.includes('forward') || dropdown.textContent.includes('backward')) {
+                        options = ['forward', 'backward'];
+                    } else if (dropdown.textContent.includes('mouse-pointer')) {
+                        options = ['mouse-pointer'].concat(Object.keys(sprites));
+                    } else if (dropdown.textContent.includes('color') || dropdown.textContent.includes('ghost')) {
+                        options = ['color', 'fisheye', 'whirl', 'pixelate', 'mosaic', 'brightness', 'ghost'];
+                    } else if (dropdown.textContent.includes('space')) {
+                        options = ['space', 'up arrow', 'down arrow', 'right arrow', 'left arrow', 'any'];
+                    } else if (dropdown.textContent.includes('year')) {
+                        options = ['year', 'month', 'date', 'day of week', 'hour', 'minute', 'second'];
+                    } else if (dropdown.textContent.includes('all')) {
+                        options = ['all', 'this script', 'other scripts in sprite'];
+                    } else if (dropdown.textContent.includes('message')) {
+                        options = ['message1', 'message2', 'new message...'];
+                    } else if (dropdown.textContent.includes('my variable')) {
+                        options = ['my variable', 'create variable...'];
+                    } else if (dropdown.textContent.includes('Sprite')) {
+                        options = Object.keys(sprites);
+                    }
+                    
+                    if (options.length > 0) {
+                        // Create dropdown menu
+                        const menu = document.createElement('div');
+                        menu.style.position = 'absolute';
+                        menu.style.background = 'var(--sidebar-bg)';
+                        menu.style.border = '1px solid var(--border-color)';
+                        menu.style.borderRadius = '5px';
+                        menu.style.padding = '5px 0';
+                        menu.style.zIndex = '100';
+                        
+                        const rect = dropdown.getBoundingClientRect();
+                        menu.style.left = `${rect.left}px`;
+                        menu.style.top = `${rect.bottom}px`;
+                        
+                        // Add options to menu
+                        options.forEach(option => {
+                            const item = document.createElement('div');
+                            item.style.padding = '5px 10px';
+                            item.style.cursor = 'pointer';
+                            item.textContent = option;
+                            
+                            item.addEventListener('mouseover', () => {
+                                item.style.backgroundColor = 'var(--block-bg)';
+                            });
+                            
+                            item.addEventListener('mouseout', () => {
+                                item.style.backgroundColor = '';
+                            });
+                            
+                            item.addEventListener('click', () => {
+                                dropdown.textContent = option;
+                                document.body.removeChild(menu);
+                            });
+                            
+                            menu.appendChild(item);
+                        });
+                        
+                        // Add to document body
+                        document.body.appendChild(menu);
+                        
+                        // Close when clicking outside
+                        document.addEventListener('click', function closeMenu() {
+                            if (document.body.contains(menu)) {
+                                document.body.removeChild(menu);
+                            }
+                            document.removeEventListener('click', closeMenu);
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
