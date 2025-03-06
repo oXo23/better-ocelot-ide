@@ -1,4 +1,4 @@
-modules = ["web"]
+modules = ["python-3.11", "web"]
 
 [nix]
 channel = "stable-24_05"
@@ -12,4 +12,4 @@ author = 21148849
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "serve index.html"
+args = "serve -p 8080 index.html"
