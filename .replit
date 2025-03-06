@@ -11,5 +11,5 @@ name = "Web Server"
 author = 21148849
 
 [[workflows.workflow.tasks]]
-task = "web_static"
-args = ["."]
+task = "shell.exec"
+args = "serve index.html"
