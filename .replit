@@ -12,4 +12,4 @@ author = 21148849
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "browser index.html"
+args = "serve index.html"
