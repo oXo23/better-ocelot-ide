@@ -291,6 +291,37 @@
     
     <div class="footer">Better Ocelot IDE - An improved version of Ocelot IDE by StarSubject</div>
 
+    <!-- Canvas for running sprites -->
+    <div id="canvas-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 1000;">
+        <div style="position: relative; width: 80%; height: 80%; margin: 5% auto; background-color: #333; border-radius: 10px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <button id="close-canvas" style="position: absolute; top: 10px; right: 10px; background: var(--accent-color); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">X</button>
+            <h2 style="color: var(--accent-color); text-align: center;">Project Running</h2>
+            <canvas id="project-canvas" width="600" height="400" style="display: block; margin: 20px auto; background-color: white; border-radius: 5px;"></canvas>
+        </div>
+    </div>
+    
+    <!-- About Us Modal -->
+    <div id="about-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); z-index: 1000;">
+        <div style="position: relative; width: 60%; max-width: 600px; margin: 10% auto; background-color: var(--sidebar-bg); border-radius: 10px; padding: 20px; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+            <button id="close-about" style="position: absolute; top: 10px; right: 10px; background: var(--accent-color); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">X</button>
+            <h2 style="color: var(--accent-color); text-align: center;">About Better Ocelot IDE</h2>
+            <div style="color: var(--text-color); line-height: 1.6;">
+                <p>Better Ocelot IDE is an improved version of the original Ocelot IDE created by StarSubject.</p>
+                <p>This project aims to enhance the features and user experience of the original Ocelot IDE, which was inspired by Scratch.</p>
+                <p><strong>Original Author:</strong> <a href="https://github.com/starsubject" style="color: var(--accent-color);">starsubject</a> on GitHub, <a href="https://scratch.mit.edu/users/starsubject" style="color: var(--accent-color);">StarSubject</a> on Scratch</p>
+                <p><strong>Original Project:</strong> <a href="https://github.com/starsubject/ocelot-ide" style="color: var(--accent-color);">Ocelot IDE</a></p>
+                <p><strong>Improvements:</strong></p>
+                <ul style="padding-left: 20px;">
+                    <li>Dark theme UI</li>
+                    <li>Enhanced drag and drop functionality</li>
+                    <li>Interactive canvas for running projects</li>
+                    <li>Improved block categories and organization</li>
+                    <li>More intuitive sprite management</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Toggle block categories
         document.querySelectorAll('.category-header').forEach(header => {
@@ -329,8 +360,7 @@
                 const action = button.textContent.trim();
                 
                 if (action === 'Run ▶') {
-                    alert('Running your project!');
-                    animateSprite();
+                    runProject();
                 } else if (action === 'File') {
                     const options = ['New Project', 'Save Project', 'Load Project', 'Export'];
                     showDropdown(button, options);
@@ -338,7 +368,7 @@
                     const options = ['Undo', 'Redo', 'Copy', 'Paste', 'Delete'];
                     showDropdown(button, options);
                 } else if (action === 'Help') {
-                    const options = ['Documentation', 'Tutorials', 'About'];
+                    const options = ['Documentation', 'Tutorials', 'About Us'];
                     showDropdown(button, options);
                 }
             });
@@ -384,7 +414,7 @@
                 });
                 
                 item.addEventListener('click', () => {
-                    alert(`Selected: ${option}`);
+                    handleMenuOption(option);
                     dropdown.remove();
                 });
                 
@@ -400,6 +430,343 @@
             });
             
             document.body.appendChild(dropdown);
+        }
+        
+        // Handle menu option selection
+        function handleMenuOption(option) {
+            switch(option) {
+                case 'New Project':
+                    if(confirm('Start a new project? Current project will be lost.')) {
+                        document.querySelector('.drop-zone').innerHTML = '';
+                    }
+                    break;
+                case 'Save Project':
+                    saveProject();
+                    break;
+                case 'Load Project':
+                    loadProject();
+                    break;
+                case 'Export':
+                    exportProject();
+                    break;
+                case 'Undo':
+                    // Implement undo functionality
+                    alert('Undo feature will be implemented in a future update.');
+                    break;
+                case 'Redo':
+                    // Implement redo functionality
+                    alert('Redo feature will be implemented in a future update.');
+                    break;
+                case 'Copy':
+                    // Implement copy functionality
+                    alert('Copy feature will be implemented in a future update.');
+                    break;
+                case 'Paste':
+                    // Implement paste functionality
+                    alert('Paste feature will be implemented in a future update.');
+                    break;
+                case 'Delete':
+                    // Implement delete functionality
+                    alert('Delete feature will be implemented in a future update.');
+                    break;
+                case 'Documentation':
+                    alert('Documentation will be available in a future update.');
+                    break;
+                case 'Tutorials':
+                    alert('Tutorials will be available in a future update.');
+                    break;
+                case 'About Us':
+                    showAboutModal();
+                    break;
+            }
+        }
+        
+        // Show about modal
+        function showAboutModal() {
+            document.getElementById('about-modal').style.display = 'block';
+        }
+        
+        // Close about modal
+        document.getElementById('close-about').addEventListener('click', () => {
+            document.getElementById('about-modal').style.display = 'none';
+        });
+        
+        // Save project functionality
+        function saveProject() {
+            const dropZone = document.querySelector('.drop-zone');
+            const blocks = Array.from(dropZone.querySelectorAll('.block')).map(block => ({
+                type: Array.from(block.classList).find(c => c !== 'block'),
+                text: block.textContent,
+                marginLeft: block.style.marginLeft || '0px'
+            }));
+            
+            const sprites = Array.from(document.querySelectorAll('.sprite')).map(sprite => ({
+                name: sprite.textContent.trim(),
+                active: sprite.classList.contains('active')
+            })).filter(sprite => sprite.name !== '+');
+            
+            const projectData = {
+                blocks,
+                sprites
+            };
+            
+            const projectJson = JSON.stringify(projectData);
+            localStorage.setItem('betterOcelotProject', projectJson);
+            
+            alert('Project saved successfully!');
+        }
+        
+        // Load project functionality
+        function loadProject() {
+            const projectJson = localStorage.getItem('betterOcelotProject');
+            if (!projectJson) {
+                alert('No saved project found.');
+                return;
+            }
+            
+            try {
+                const projectData = JSON.parse(projectJson);
+                
+                // Load blocks
+                const dropZone = document.querySelector('.drop-zone');
+                dropZone.innerHTML = '';
+                
+                projectData.blocks.forEach(blockData => {
+                    const newBlock = document.createElement('div');
+                    newBlock.className = `block ${blockData.type}`;
+                    newBlock.textContent = blockData.text;
+                    newBlock.style.marginLeft = blockData.marginLeft;
+                    newBlock.style.marginBottom = '5px';
+                    
+                    dropZone.appendChild(newBlock);
+                    setupWorkspaceBlockDrag(newBlock);
+                });
+                
+                // Load sprites
+                const spritesContainer = document.querySelector('.sprites');
+                const plusSprite = Array.from(document.querySelectorAll('.sprite')).find(sprite => sprite.textContent.trim() === '+');
+                
+                // Remove existing sprites except the "+" sprite
+                Array.from(document.querySelectorAll('.sprite')).forEach(sprite => {
+                    if (sprite.textContent.trim() !== '+') {
+                        sprite.remove();
+                    }
+                });
+                
+                // Add sprites from saved data
+                projectData.sprites.forEach(spriteData => {
+                    const newSprite = document.createElement('div');
+                    newSprite.className = 'sprite';
+                    if (spriteData.active) {
+                        newSprite.classList.add('active');
+                    }
+                    newSprite.innerHTML = `<div>${spriteData.name}</div>`;
+                    
+                    // Add sprite before the "+" sprite
+                    spritesContainer.insertBefore(newSprite, plusSprite);
+                    
+                    newSprite.addEventListener('click', () => {
+                        document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
+                        newSprite.classList.add('active');
+                    });
+                });
+                
+                alert('Project loaded successfully!');
+            } catch(e) {
+                alert('Error loading project: ' + e.message);
+            }
+        }
+        
+        // Export project functionality
+        function exportProject() {
+            const dropZone = document.querySelector('.drop-zone');
+            const blocks = Array.from(dropZone.querySelectorAll('.block')).map(block => ({
+                type: Array.from(block.classList).find(c => c !== 'block'),
+                text: block.textContent,
+                marginLeft: block.style.marginLeft || '0px'
+            }));
+            
+            const sprites = Array.from(document.querySelectorAll('.sprite')).map(sprite => ({
+                name: sprite.textContent.trim(),
+                active: sprite.classList.contains('active')
+            })).filter(sprite => sprite.name !== '+');
+            
+            const projectData = {
+                blocks,
+                sprites
+            };
+            
+            const projectJson = JSON.stringify(projectData, null, 2);
+            
+            // Create a download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(new Blob([projectJson], {type: 'application/json'}));
+            downloadLink.download = 'ocelot_project.json';
+            
+            // Append to body, click and remove
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+        
+        // Run the project
+        function runProject() {
+            // Show canvas
+            document.getElementById('canvas-container').style.display = 'block';
+            
+            // Get the canvas and context
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Get active sprite
+            const activeSprite = document.querySelector('.sprite.active');
+            const spriteName = activeSprite ? activeSprite.textContent.trim() : 'Sprite 1';
+            
+            // Draw sprite on canvas
+            ctx.fillStyle = getColorForSprite(spriteName);
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add sprite name
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(spriteName, canvas.width / 2, canvas.height / 2 + 60);
+            
+            // Execute the blocks
+            executeBlocks();
+        }
+        
+        // Close canvas button
+        document.getElementById('close-canvas').addEventListener('click', () => {
+            document.getElementById('canvas-container').style.display = 'none';
+        });
+        
+        // Get a color for a sprite based on its name
+        function getColorForSprite(name) {
+            // Simple hash function to generate a color
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            const hue = hash % 360;
+            return `hsl(${hue}, 80%, 50%)`;
+        }
+        
+        // Execute the blocks in the workspace
+        function executeBlocks() {
+            const blocks = document.querySelectorAll('.drop-zone .block');
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Starting position for sprite
+            let x = canvas.width / 2;
+            let y = canvas.height / 2;
+            let size = 40;
+            
+            blocks.forEach((block, index) => {
+                // Add visual indication that this block is executing
+                setTimeout(() => {
+                    // Highlight the executing block
+                    block.style.boxShadow = '0 0 10px yellow';
+                    
+                    // Execute the block based on its type
+                    if (block.classList.contains('motion')) {
+                        if (block.textContent.includes('Move')) {
+                            const steps = parseInt(block.textContent.match(/\d+/)[0]);
+                            // Move the sprite
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = 'white';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            
+                            // Update position
+                            x += steps;
+                            
+                            // Draw the updated sprite
+                            const activeSprite = document.querySelector('.sprite.active');
+                            const spriteName = activeSprite ? activeSprite.textContent.trim() : 'Sprite 1';
+                            
+                            ctx.fillStyle = getColorForSprite(spriteName);
+                            ctx.beginPath();
+                            ctx.arc(x, y, size, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            ctx.fillStyle = 'black';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(spriteName, x, y + 60);
+                        }
+                    } else if (block.classList.contains('looks')) {
+                        if (block.textContent.includes('Say')) {
+                            // Make the sprite say something
+                            const text = block.textContent.replace('Say ', '');
+                            
+                            // Draw a speech bubble
+                            ctx.fillStyle = 'white';
+                            ctx.beginPath();
+                            ctx.ellipse(x + 80, y - 30, 70, 30, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.strokeStyle = 'black';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            // Draw speech bubble tail
+                            ctx.beginPath();
+                            ctx.moveTo(x + 20, y - 10);
+                            ctx.quadraticCurveTo(x + 40, y - 20, x + 50, y - 30);
+                            ctx.stroke();
+                            ctx.fill();
+                            
+                            // Draw text in bubble
+                            ctx.fillStyle = 'black';
+                            ctx.font = '14px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(text, x + 80, y - 25);
+                        } else if (block.textContent.includes('size')) {
+                            if (block.textContent.includes('Change size by')) {
+                                const change = parseInt(block.textContent.match(/\d+/)[0]);
+                                size += change;
+                            } else if (block.textContent.includes('Set size to')) {
+                                const newSize = parseInt(block.textContent.match(/\d+/)[0]);
+                                size = (newSize / 100) * 40; // 100% = 40px radius
+                            }
+                            
+                            // Redraw sprite with new size
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = 'white';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            
+                            const activeSprite = document.querySelector('.sprite.active');
+                            const spriteName = activeSprite ? activeSprite.textContent.trim() : 'Sprite 1';
+                            
+                            ctx.fillStyle = getColorForSprite(spriteName);
+                            ctx.beginPath();
+                            ctx.arc(x, y, size, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            ctx.fillStyle = 'black';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(spriteName, x, y + size + 20);
+                        }
+                    } else if (block.classList.contains('control')) {
+                        if (block.textContent.includes('Wait')) {
+                            // Wait is handled by the setTimeout delay
+                        }
+                    }
+                    
+                    // Remove highlight after a short delay
+                    setTimeout(() => {
+                        block.style.boxShadow = '';
+                    }, 500);
+                }, index * 1000); // Execute blocks with a 1-second delay between them
+            });
         }
         
         // Animate the active sprite
