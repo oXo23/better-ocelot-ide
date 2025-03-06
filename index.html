@@ -1,10 +1,26 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Better Ocelot IDE</title>
-<style>
+    <style>
+        :root {
+            --main-bg: #1e1e1e;
+            --header-bg: #2c2c2c;
+            --sidebar-bg: #252526;
+            --block-bg: #4a4a4a;
+            --accent-color: #4CAF50;
+            --text-color: #e0e0e0;
+            --border-color: #3e3e3e;
+            --block-motion: #6956c4;
+            --block-looks: #9356b0;
+            --block-events: #de9e2e;
+            --block-control: #e1a91a;
+            --block-operators: #5cb712;
+        }
+        
         body {
             display: grid;
             grid-template-areas:
@@ -12,50 +28,284 @@
                 "sidebar main-content"
                 "footer footer";
             grid-template-rows: 50px 1fr 30px;
-            grid-template-columns: 200px 1fr;
+            grid-template-columns: 250px 1fr;
             height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-color);
         }
 
         .header {
             grid-area: header;
-            background-color: #2c2c2c;
-            color: #4CAF50;
-            text-align: center;
-            line-height: 50px;
-            border-bottom: 1px solid #3e3e3e;
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .menu {
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
         }
 
         .sidebar {
             grid-area: sidebar;
-            background-color: #252526;
-            padding: 20px;
-            border-right: 1px solid #3e3e3e;
+            background-color: var(--sidebar-bg);
+            padding: 10px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .category {
+            margin-bottom: 15px;
+        }
+
+        .category-header {
+            background-color: var(--block-bg);
+            padding: 8px 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .block {
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
+            cursor: move;
+            display: flex;
+            align-items: center;
+        }
+
+        .motion {
+            background-color: var(--block-motion);
+        }
+
+        .looks {
+            background-color: var(--block-looks);
+        }
+
+        .events {
+            background-color: var(--block-events);
+        }
+
+        .control {
+            background-color: var(--block-control);
+        }
+
+        .operators {
+            background-color: var(--block-operators);
         }
 
         .main-content {
             grid-area: main-content;
+            display: grid;
+            grid-template-rows: 60% 40%;
+            overflow: hidden;
+        }
+
+        .workspace {
+            background-color: #2d2d2d;
             padding: 20px;
-            background-color: #1e1e1e;
+            overflow: auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sprites {
+            display: flex;
+            padding: 10px;
+            background-color: #333;
+            overflow-x: auto;
+            gap: 10px;
+        }
+
+        .sprite {
+            width: 80px;
+            height: 80px;
+            background-color: #444;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sprite.active {
+            border: 2px solid var(--accent-color);
+        }
+
+        .preview {
+            width: 120px;
+            height: 120px;
+            background-color: #444;
+            border-radius: 5px;
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .footer {
             grid-area: footer;
-            background-color: #2c2c2c;
-            color: #4CAF50;
+            background-color: var(--header-bg);
+            color: var(--accent-color);
             text-align: center;
             line-height: 30px;
-            border-top: 1px solid #3e3e3e;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.8rem;
         }
-</style>
+
+        .drop-zone {
+            min-height: 200px;
+            background-color: #282828;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">Header</div>
-    <div class="sidebar">Sidebar</div>
-    <div class="main-content">Main Content</div>
-    <div class="footer">Footer</div>
+    <div class="header">
+        <div class="logo">Better Ocelot IDE</div>
+        <div class="menu">
+            <button>File</button>
+            <button>Edit</button>
+            <button>Help</button>
+            <button>Run ▶</button>
+        </div>
+    </div>
+    
+    <div class="sidebar">
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-motion);">Motion</div>
+            <div class="blocks">
+                <div class="block motion">Move 10 steps</div>
+                <div class="block motion">Turn right 15 degrees</div>
+                <div class="block motion">Turn left 15 degrees</div>
+                <div class="block motion">Go to x: 0 y: 0</div>
+                <div class="block motion">Glide 1 secs to x: 0 y: 0</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-looks);">Looks</div>
+            <div class="blocks">
+                <div class="block looks">Say Hello!</div>
+                <div class="block looks">Switch costume to costume1</div>
+                <div class="block looks">Change size by 10</div>
+                <div class="block looks">Set size to 100%</div>
+                <div class="block looks">Change color effect by 25</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-events);">Events</div>
+            <div class="blocks">
+                <div class="block events">When flag clicked</div>
+                <div class="block events">When space key pressed</div>
+                <div class="block events">When this sprite clicked</div>
+                <div class="block events">When backdrop switches to backdrop1</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-control);">Control</div>
+            <div class="blocks">
+                <div class="block control">Wait 1 seconds</div>
+                <div class="block control">Repeat 10</div>
+                <div class="block control">If...then</div>
+                <div class="block control">If...then...else</div>
+                <div class="block control">Wait until</div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" style="background-color: var(--block-operators);">Operators</div>
+            <div class="blocks">
+                <div class="block operators">+ addition</div>
+                <div class="block operators">- subtraction</div>
+                <div class="block operators">* multiplication</div>
+                <div class="block operators">/ division</div>
+                <div class="block operators">Pick random 1 to 10</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="workspace">
+            <h3>Code Workspace</h3>
+            <div class="drop-zone">
+                <!-- This is where the blocks will be dropped -->
+                <div class="block events" style="margin-bottom: 5px;">When flag clicked</div>
+                <div class="block motion" style="margin-left: 20px; margin-bottom: 5px;">Move 10 steps</div>
+                <div class="block looks" style="margin-left: 20px; margin-bottom: 5px;">Say Hello!</div>
+                <div class="block control" style="margin-left: 20px;">Wait 1 seconds</div>
+            </div>
+        </div>
+        
+        <div class="sprites">
+            <div class="preview">
+                Stage Preview
+            </div>
+            
+            <div class="sprite active">
+                <div>Sprite 1</div>
+            </div>
+            
+            <div class="sprite">
+                <div>Sprite 2</div>
+            </div>
+            
+            <div class="sprite">
+                <div>Sprite 3</div>
+            </div>
+            
+            <div class="sprite">
+                <div>+</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">Better Ocelot IDE - An improved version of Ocelot IDE by StarSubject</div>
+
+    <script>
+        // Basic functionality - in a real implementation you'd have more robust code
+        document.querySelectorAll('.category-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const blocks = header.nextElementSibling;
+                blocks.style.display = blocks.style.display === 'none' ? 'flex' : 'none';
+            });
+        });
+
+        document.querySelectorAll('.sprite').forEach(sprite => {
+            sprite.addEventListener('click', () => {
+                document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
+                sprite.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
