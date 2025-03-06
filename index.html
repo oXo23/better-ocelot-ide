@@ -974,6 +974,101 @@
     </div>
 
     <script>
+        // Block definitions array
+        const blocks = [
+            // Motion blocks
+            {block: "Move {steps=number} steps", code: "sprite.x += {steps} * Math.cos(sprite.direction * (Math.PI / 180)); sprite.y += {steps} * Math.sin(sprite.direction * (Math.PI / 180));", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Turn right {degrees=number} degrees", code: "sprite.direction = (sprite.direction + {degrees}) % 360;", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Turn left {degrees=number} degrees", code: "sprite.direction = (sprite.direction - {degrees} + 360) % 360;", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Go to x: {x=number} y: {y=number}", code: "sprite.x = {x}; sprite.y = {y};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Glide {seconds=number} secs to x: {x=number} y: {y=number}", code: "// Animation code would go here", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Point in direction {direction=number}", code: "sprite.direction = {direction};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Point towards {target=dropdown}", code: "// Calculate angle towards target", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Change x by {amount=number}", code: "sprite.x += {amount};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Set x to {value=number}", code: "sprite.x = {value};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Change y by {amount=number}", code: "sprite.y += {amount};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Set y to {value=number}", code: "sprite.y = {value};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "If on edge, bounce", code: "// Edge detection code", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "Set rotation style {style=dropdown}", code: "sprite.rotationStyle = {style};", type: "no_code_section", is_input: false, category: "motion"},
+            {block: "X position", code: "sprite.x", type: "no_code_section", is_input: true, category: "motion"},
+            {block: "Y position", code: "sprite.y", type: "no_code_section", is_input: true, category: "motion"},
+            {block: "Direction", code: "sprite.direction", type: "no_code_section", is_input: true, category: "motion"},
+            
+            // Looks blocks
+            {block: "Say {message=string}", code: "displayMessage(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Say {message=string} for {seconds=number} seconds", code: "displayMessage(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Think {message=string}", code: "displayThought(sprite, {message});", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Think {message=string} for {seconds=number} seconds", code: "displayThought(sprite, {message}, {seconds});", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Switch costume to {costume=dropdown}", code: "sprite.activeCostume = {costume};", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Next costume", code: "// Cycle to next costume", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Switch backdrop to {backdrop=dropdown}", code: "// Switch backdrop code", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Next backdrop", code: "// Next backdrop code", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Change size by {amount=number}", code: "sprite.size += {amount}; if (sprite.size < 1) sprite.size = 1;", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Set size to {size=number}%", code: "sprite.size = {size}; if (sprite.size < 1) sprite.size = 1;", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Show", code: "sprite.visible = true;", type: "no_code_section", is_input: false, category: "looks"},
+            {block: "Hide", code: "sprite.visible = false;", type: "no_code_section", is_input: false, category: "looks"},
+            
+            // Events blocks
+            {block: "When flag clicked", code: "// Flag clicked event", type: "event", is_input: false, category: "events"},
+            {block: "When {key=key} key pressed", code: "// Key pressed event", type: "event", is_input: false, category: "events"},
+            {block: "When this sprite clicked", code: "// Sprite clicked event", type: "event", is_input: false, category: "events"},
+            {block: "When backdrop switches to {backdrop=dropdown}", code: "// Backdrop changed event", type: "event", is_input: false, category: "events"},
+            {block: "When {condition=dropdown} > {value=number}", code: "// Condition event", type: "event", is_input: false, category: "events"},
+            {block: "When I receive {message=dropdown}", code: "// Message received event", type: "event", is_input: false, category: "events"},
+            {block: "Broadcast {message=dropdown}", code: "broadcastMessage({message});", type: "no_code_section", is_input: false, category: "events"},
+            {block: "Broadcast {message=dropdown} and wait", code: "broadcastMessageAndWait({message});", type: "no_code_section", is_input: false, category: "events"},
+            
+            // Control blocks
+            {block: "Wait {seconds=number} seconds", code: "await wait({seconds});", type: "no_code_section", is_input: false, category: "control"},
+            {block: "Repeat {times=number}", code: "for (let i = 0; i < {times}; i++) {", type: "code_section", is_input: false, category: "control"},
+            {block: "End repeat", code: "}", type: "end", is_input: false, category: "control"},
+            {block: "Forever", code: "while (true) {", type: "code_section", is_input: false, category: "control"},
+            {block: "End forever", code: "}", type: "end", is_input: false, category: "control"},
+            {block: "If {condition=boolean} then", code: "if ({condition}) {", type: "code_section", is_input: false, category: "control"},
+            {block: "End if", code: "}", type: "end", is_input: false, category: "control"},
+            {block: "If {condition=boolean} then", code: "if ({condition}) {", type: "code_section_with_else", is_input: false, category: "control"},
+            {block: "Else", code: "} else {", type: "else", is_input: false, category: "control"},
+            {block: "End if else", code: "}", type: "end", is_input: false, category: "control"},
+            {block: "Wait until {condition=boolean}", code: "await waitUntil(() => {condition});", type: "no_code_section", is_input: false, category: "control"},
+            {block: "Repeat until {condition=boolean}", code: "while (!({condition})) {", type: "code_section", is_input: false, category: "control"},
+            {block: "End repeat until", code: "}", type: "end", is_input: false, category: "control"},
+            {block: "Stop {target=dropdown}", code: "stop({target});", type: "no_code_section", is_input: false, category: "control"},
+            
+            // Operators blocks
+            {block: "{a=number} + {b=number}", code: "({a} + {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=number} - {b=number}", code: "({a} - {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=number} * {b=number}", code: "({a} * {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=number} / {b=number}", code: "({a} / {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "Pick random {min=number} to {max=number}", code: "Math.floor(Math.random() * ({max} - {min} + 1) + {min})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=boolean} < {b=boolean}", code: "({a} < {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=boolean} = {b=boolean}", code: "({a} === {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=boolean} > {b=boolean}", code: "({a} > {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=boolean} and {b=boolean}", code: "({a} && {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "{a=boolean} or {b=boolean}", code: "({a} || {b})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "not {bool=boolean}", code: "(!{bool})", type: "no_code_section", is_input: true, category: "operators"},
+            {block: "join {a=string} {b=string}", code: "({a} + {b})", type: "no_code_section", is_input: true, category: "operators"},
+            
+            // Variables blocks
+            {block: "Set {var=variable} to {value=any}", code: "variables[{var}] = {value};", type: "no_code_section", is_input: false, category: "variables"},
+            {block: "Change {var=variable} by {amount=number}", code: "variables[{var}] += {amount};", type: "no_code_section", is_input: false, category: "variables"},
+            {block: "Show variable {var=variable}", code: "showVariable({var});", type: "no_code_section", is_input: false, category: "variables"},
+            {block: "Hide variable {var=variable}", code: "hideVariable({var});", type: "no_code_section", is_input: false, category: "variables"},
+            {block: "{var=variable}", code: "variables[{var}]", type: "no_code_section", is_input: true, category: "variables"},
+            
+            // Sound blocks
+            {block: "Play sound {sound=dropdown}", code: "playSound(sprite, {sound});", type: "no_code_section", is_input: false, category: "sound"},
+            {block: "Play sound {sound=dropdown} until done", code: "await playSoundUntilDone(sprite, {sound});", type: "no_code_section", is_input: false, category: "sound"},
+            {block: "Stop all sounds", code: "stopAllSounds();", type: "no_code_section", is_input: false, category: "sound"},
+            
+            // Sensing blocks
+            {block: "Touching {target=dropdown}?", code: "isTouching(sprite, {target})", type: "no_code_section", is_input: true, category: "sensing"},
+            {block: "Touching color {color=color}?", code: "isTouchingColor(sprite, {color})", type: "no_code_section", is_input: true, category: "sensing"},
+            {block: "Key {key=key} pressed?", code: "isKeyPressed({key})", type: "no_code_section", is_input: true, category: "sensing"},
+            {block: "Mouse down?", code: "isMouseDown()", type: "no_code_section", is_input: true, category: "sensing"},
+            {block: "Mouse x", code: "getMouseX()", type: "no_code_section", is_input: true, category: "sensing"},
+            {block: "Mouse y", code: "getMouseY()", type: "no_code_section", is_input: true, category: "sensing"}
+        ];
+        
         // Store sprites and their scripts
         const sprites = {
             'Sprite 1': {
@@ -1024,9 +1119,12 @@
 
         // Initialize canvases for sprites and costumes
         initCanvases();
-
+        
         // Initialize preview canvas
         updatePreviewCanvas();
+        
+        // Generate blocks dynamically
+        generateBlocksFromConfig();
 
         // Toggle block categories
         document.querySelectorAll('.category-header').forEach(header => {
@@ -1824,114 +1922,244 @@
             const sprite = sprites[spriteName];
             const canvas = document.getElementById('project-canvas');
             const ctx = canvas.getContext('2d');
+            
+            // Find corresponding block configuration
+            const blockText = block.textContent.trim();
+            const blockConfig = findBlockConfigForElement(block);
+            
+            if (blockConfig) {
+                // Execute the block using its code template
+                try {
+                    // Extract parameter values from the block's input elements
+                    const parameters = extractParametersFromBlock(block, blockConfig);
+                    
+                    // Generate and execute code
+                    const code = generateCodeFromTemplate(blockConfig.code, parameters);
+                    
+                    // Simple execution (this would be expanded in a real implementation)
+                    if (blockConfig.category === 'motion') {
+                        if (blockText.includes('Move')) {
+                            const steps = parameters.steps || 10;
+                            const angle = sprite.direction * (Math.PI / 180);
+                            sprite.x += steps * Math.cos(angle);
+                            sprite.y += steps * Math.sin(angle);
+                            redrawCanvas();
+                        } else if (blockText.includes('Turn right')) {
+                            const degrees = parameters.degrees || 15;
+                            sprite.direction = (sprite.direction + degrees) % 360;
+                            redrawCanvas();
+                        } else if (blockText.includes('Turn left')) {
+                            const degrees = parameters.degrees || 15;
+                            sprite.direction = (sprite.direction - degrees + 360) % 360;
+                            redrawCanvas();
+                        } else if (blockText.includes('Go to x:')) {
+                            sprite.x = parameters.x || 0;
+                            sprite.y = parameters.y || 0;
+                            redrawCanvas();
+                        }
+                    } else if (blockConfig.category === 'looks') {
+                        if (blockText.includes('Say')) {
+                            displayMessage(sprite, parameters.message || 'Hello!');
+                        } else if (blockText.includes('Change size by')) {
+                            sprite.size += parameters.amount || 10;
+                            if (sprite.size < 1) sprite.size = 1;
+                            redrawCanvas();
+                        } else if (blockText.includes('Set size to')) {
+                            sprite.size = parameters.size || 100;
+                            if (sprite.size < 1) sprite.size = 1;
+                            redrawCanvas();
+                        } else if (blockText.includes('Hide')) {
+                            sprite.visible = false;
+                            redrawCanvas();
+                        } else if (blockText.includes('Show')) {
+                            sprite.visible = true;
+                            redrawCanvas();
+                        }
+                    } else if (blockConfig.category === 'sound') {
+                        if (blockText.includes('Play sound')) {
+                            playSound(sprite, parameters.sound || 'meow');
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error executing block:', e);
+                }
+            } else {
+                // Fallback to the original implementation for blocks without a configuration
+                if (block.classList.contains('motion')) {
+                    if (block.textContent.includes('Move')) {
+                        // Extract steps value from the block's input
+                        const stepsInput = block.querySelector('.block-input');
+                        const steps = stepsInput ? parseInt(stepsInput.textContent) : 10;
 
-            // Determine block type and action
-            if (block.classList.contains('motion')) {
-                if (block.textContent.includes('Move')) {
-                    // Extract steps value from the block's input
-                    const stepsInput = block.querySelector('.block-input');
-                    const steps = stepsInput ? parseInt(stepsInput.textContent) : 10;
+                        // Calculate new position based on direction
+                        const angle = sprite.direction * (Math.PI / 180);
+                        sprite.x += steps * Math.cos(angle);
+                        sprite.y += steps * Math.sin(angle);
 
-                    // Calculate new position based on direction
-                    const angle = sprite.direction * (Math.PI / 180);
-                    sprite.x += steps * Math.cos(angle);
-                    sprite.y += steps * Math.sin(angle);
+                        // Redraw canvas
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Turn right')) {
+                        const degreesInput = block.querySelector('.block-input');
+                        const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
 
-                    // Redraw canvas
-                    redrawCanvas();
-                } else if (block.textContent.includes('Turn right')) {
-                    const degreesInput = block.querySelector('.block-input');
-                    const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
+                        sprite.direction = (sprite.direction + degrees) % 360;
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Turn left')) {
+                        const degreesInput = block.querySelector('.block-input');
+                        const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
 
-                    sprite.direction = (sprite.direction + degrees) % 360;
-                    redrawCanvas();
-                } else if (block.textContent.includes('Turn left')) {
-                    const degreesInput = block.querySelector('.block-input');
-                    const degrees = degreesInput ? parseInt(degreesInput.textContent) : 15;
+                        sprite.direction = (sprite.direction - degrees + 360) % 360;
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Go to x:')) {
+                        const inputs = block.querySelectorAll('.block-input');
+                        if (inputs.length >= 2) {
+                            sprite.x = parseInt(inputs[0].textContent);
+                            sprite.y = parseInt(inputs[1].textContent);
+                            redrawCanvas();
+                        }
+                    }
+                } else if (block.classList.contains('looks')) {
+                    if (block.textContent.includes('Say')) {
+                        const textInput = block.querySelector('.block-input');
+                        const text = textInput ? textInput.textContent : 'Hello!';
+                        displayMessage(sprite, text);
+                    } else if (block.textContent.includes('Change size by')) {
+                        const sizeInput = block.querySelector('.block-input');
+                        const sizeChange = sizeInput ? parseInt(sizeInput.textContent) : 10;
 
-                    sprite.direction = (sprite.direction - degrees + 360) % 360;
-                    redrawCanvas();
-                } else if (block.textContent.includes('Go to x:')) {
-                    const inputs = block.querySelectorAll('.block-input');
-                    if (inputs.length >= 2) {
-                        sprite.x = parseInt(inputs[0].textContent);
-                        sprite.y = parseInt(inputs[1].textContent);
+                        sprite.size += sizeChange;
+                        if (sprite.size < 1) sprite.size = 1;
+
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Set size to')) {
+                        const sizeInput = block.querySelector('.block-input');
+                        const newSize = sizeInput ? parseInt(sizeInput.textContent) : 100;
+
+                        sprite.size = newSize;
+                        if (sprite.size < 1) sprite.size = 1;
+
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Hide')) {
+                        sprite.visible = false;
+                        redrawCanvas();
+                    } else if (block.textContent.includes('Show')) {
+                        sprite.visible = true;
                         redrawCanvas();
                     }
-                }
-            } else if (block.classList.contains('looks')) {
-                if (block.textContent.includes('Say')) {
-                    const textInput = block.querySelector('.block-input');
-                    const text = textInput ? textInput.textContent : 'Hello!';
-
-                    // Calculate position
-                    const x = canvas.width / 2 + sprite.x;
-                    const y = canvas.height / 2 - sprite.y;
-
-                    // Draw speech bubble
-                    ctx.fillStyle = 'white';
-                    ctx.beginPath();
-                    ctx.ellipse(x + 60, y - 30, 70, 30, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Draw speech bubble tail
-                    ctx.beginPath();
-                    ctx.moveTo(x + 20, y - 10);
-                    ctx.quadraticCurveTo(x + 30, y - 20, x + 40, y - 30);
-                    ctx.stroke();
-                    ctx.fill();
-
-                    // Draw text
-                    ctx.fillStyle = 'black';
-                    ctx.font = '14px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(text, x + 60, y - 25);
-                } else if (block.textContent.includes('Change size by')) {
-                    const sizeInput = block.querySelector('.block-input');
-                    const sizeChange = sizeInput ? parseInt(sizeInput.textContent) : 10;
-
-                    sprite.size += sizeChange;
-                    if (sprite.size < 1) sprite.size = 1;
-
-                    redrawCanvas();
-                } else if (block.textContent.includes('Set size to')) {
-                    const sizeInput = block.querySelector('.block-input');
-                    const newSize = sizeInput ? parseInt(sizeInput.textContent) : 100;
-
-                    sprite.size = newSize;
-                    if (sprite.size < 1) sprite.size = 1;
-
-                    redrawCanvas();
-                } else if (block.textContent.includes('Hide')) {
-                    sprite.visible = false;
-                    redrawCanvas();
-                } else if (block.textContent.includes('Show')) {
-                    sprite.visible = true;
-                    redrawCanvas();
-                }
-            } else if (block.classList.contains('sound')) {
-                if (block.textContent.includes('Play sound')) {
-                    // Create a beep sound (simplified implementation)
-                    try {
-                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioCtx.createOscillator();
-                        oscillator.type = 'sine';
-                        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 note
-                        oscillator.connect(audioCtx.destination);
-                        oscillator.start();
-                        setTimeout(() => oscillator.stop(), 500); // Stop after 0.5 seconds
-                    } catch (e) {
-                        console.error('Web Audio API is not supported in this browser');
+                } else if (block.classList.contains('sound')) {
+                    if (block.textContent.includes('Play sound')) {
+                        playSound(sprite, 'beep');
+                    }
+                } else if (block.classList.contains('control')) {
+                    if (block.textContent.includes('Wait')) {
+                        // Wait is handled by the setTimeout delay in the executeScripts function
                     }
                 }
-            } else if (block.classList.contains('control')) {
-                if (block.textContent.includes('Wait')) {
-                    // Wait is handled by the setTimeout delay in the executeScripts function
-                }
             }
+        }
+        
+        // Function to display a message from a sprite
+        function displayMessage(sprite, text) {
+            const canvas = document.getElementById('project-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Calculate position
+            const x = canvas.width / 2 + sprite.x;
+            const y = canvas.height / 2 - sprite.y;
+
+            // Draw speech bubble
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.ellipse(x + 60, y - 30, 70, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw speech bubble tail
+            ctx.beginPath();
+            ctx.moveTo(x + 20, y - 10);
+            ctx.quadraticCurveTo(x + 30, y - 20, x + 40, y - 30);
+            ctx.stroke();
+            ctx.fill();
+
+            // Draw text
+            ctx.fillStyle = 'black';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, x + 60, y - 25);
+        }
+        
+        // Function to play a sound
+        function playSound(sprite, soundName) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4 note
+                oscillator.connect(audioCtx.destination);
+                oscillator.start();
+                setTimeout(() => oscillator.stop(), 500); // Stop after 0.5 seconds
+            } catch (e) {
+                console.error('Web Audio API is not supported in this browser');
+            }
+        }
+        
+        // Find block configuration that matches a DOM element
+        function findBlockConfigForElement(blockElement) {
+            const blockText = blockElement.textContent.trim();
+            const category = Array.from(blockElement.classList)
+                .find(cls => ['motion', 'looks', 'events', 'control', 'operators', 'variables', 'sensing', 'sound', 'pen', 'my-blocks'].includes(cls));
+            
+            // Find a matching block definition
+            return blocks.find(block => {
+                if (block.category !== category) return false;
+                
+                // Convert the block definition syntax to a regex pattern
+                const pattern = block.block.replace(/\{([^=]+)=[^}]+\}/g, '(.+)');
+                const regex = new RegExp(`^${pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`);
+                
+                return regex.test(blockText);
+            });
+        }
+        
+        // Extract parameter values from a block element
+        function extractParametersFromBlock(blockElement, blockConfig) {
+            const parameters = {};
+            
+            // Extract parameter names from block configuration
+            const paramNames = [];
+            const paramRegex = /\{([^=]+)=[^}]+\}/g;
+            let match;
+            while ((match = paramRegex.exec(blockConfig.block)) !== null) {
+                paramNames.push(match[1]);
+            }
+            
+            // Extract values from block element inputs
+            const inputs = blockElement.querySelectorAll('.block-input, .block-dropdown');
+            inputs.forEach((input, index) => {
+                if (index < paramNames.length) {
+                    const value = input.textContent.trim();
+                    parameters[paramNames[index]] = input.classList.contains('block-input') ? 
+                        (isNaN(value) ? value : Number(value)) : value;
+                }
+            });
+            
+            return parameters;
+        }
+        
+        // Generate code from a template and parameters
+        function generateCodeFromTemplate(template, parameters) {
+            let code = template;
+            
+            // Replace parameter placeholders with their values
+            Object.keys(parameters).forEach(param => {
+                const value = parameters[param];
+                const valueString = typeof value === 'string' ? `"${value}"` : value;
+                code = code.replace(new RegExp(`\\{${param}\\}`, 'g'), valueString);
+            });
+            
+            return code;
         }
 
         function redrawCanvas() {
@@ -2065,6 +2293,85 @@
 
             const hue = hash % 360;
             return `hsl(${hue}, 80%, 50%)`;
+        }
+        
+        // Function to generate blocks from configuration
+        function generateBlocksFromConfig() {
+            // Group blocks by category
+            const blocksByCategory = {};
+            blocks.forEach(block => {
+                if (!blocksByCategory[block.category]) {
+                    blocksByCategory[block.category] = [];
+                }
+                blocksByCategory[block.category].push(block);
+            });
+            
+            // Generate HTML for each block
+            Object.keys(blocksByCategory).forEach(category => {
+                const categoryBlocks = blocksByCategory[category];
+                const blocksContainer = document.querySelector(`.category-header[style*="--block-${category}"]`)
+                    ?.nextElementSibling;
+                
+                if (blocksContainer) {
+                    // Clear existing blocks if needed
+                    // blocksContainer.innerHTML = '';
+                    
+                    // Generate blocks (commenting out for now to avoid replacing existing blocks)
+                    // categoryBlocks.forEach(blockConfig => {
+                    //     const blockElement = createBlockElement(blockConfig);
+                    //     blocksContainer.appendChild(blockElement);
+                    // });
+                }
+            });
+        }
+        
+        // Function to create a block element from configuration
+        function createBlockElement(blockConfig) {
+            const blockElement = document.createElement('div');
+            blockElement.className = `block ${blockConfig.category}`;
+            if (blockConfig.is_input) {
+                blockElement.classList.add('operator-block');
+            }
+            if (blockConfig.type === 'end') {
+                blockElement.classList.add('block-end');
+            }
+            blockElement.setAttribute('draggable', 'true');
+            
+            // Parse the block syntax to create HTML with input elements
+            let blockHTML = blockConfig.block;
+            
+            // Replace {name=type} patterns with input elements
+            blockHTML = blockHTML.replace(/\{([^=]+)=([^}]+)\}/g, (match, name, type) => {
+                if (type === 'number') {
+                    return `<span class="block-input">${name === 'steps' ? '10' : name === 'degrees' ? '15' : '0'}</span>`;
+                } else if (type === 'string') {
+                    return `<span class="block-input">Hello!</span>`;
+                } else if (type === 'boolean') {
+                    return `<span class="block-input"></span>`;
+                } else if (type === 'dropdown') {
+                    let defaultValue = '';
+                    if (name === 'target') defaultValue = 'mouse-pointer';
+                    else if (name === 'key') defaultValue = 'space';
+                    else if (name === 'var') defaultValue = 'my variable';
+                    else if (name === 'sound') defaultValue = 'meow';
+                    else if (name === 'costume' || name === 'backdrop') defaultValue = name + '1';
+                    else if (name === 'style') defaultValue = 'all around';
+                    
+                    return `<span class="block-dropdown">${defaultValue}</span>`;
+                } else if (type === 'key') {
+                    return `<span class="block-dropdown">space</span>`;
+                } else if (type === 'color') {
+                    return `<span class="block-input" style="background-color: #ff0000; width: 20px;"></span>`;
+                } else if (type === 'variable') {
+                    return `<span class="block-dropdown">my variable</span>`;
+                } else if (type === 'any') {
+                    return `<span class="block-input">0</span>`;
+                }
+                return match;
+            });
+            
+            blockElement.innerHTML = blockHTML;
+            return blockElement;
         }
 
         // Initialize canvases for sprites and costumes
@@ -2436,7 +2743,7 @@
                         options = ['all', 'this script', 'other scripts in sprite'];
                     } else if (dropdown.textContent.includes('message')) {
                         options = ['message1', 'message2', 'new message...'];
-                    } else if (if (dropdown.textContent.includes('my variable')) {
+                    } else if (dropdown.textContent.includes('my variable')) {
                         options = ['my variable', 'create variable...'];
                     } else if (dropdown.textContent.includes('Sprite')) {
                         options = Object.keys(sprites);
