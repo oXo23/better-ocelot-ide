@@ -292,7 +292,7 @@
     <div class="footer">Better Ocelot IDE - An improved version of Ocelot IDE by StarSubject</div>
 
     <script>
-        // Basic functionality - in a real implementation you'd have more robust code
+        // Toggle block categories
         document.querySelectorAll('.category-header').forEach(header => {
             header.addEventListener('click', () => {
                 const blocks = header.nextElementSibling;
@@ -300,11 +300,224 @@
             });
         });
 
+        // Sprite selection
         document.querySelectorAll('.sprite').forEach(sprite => {
             sprite.addEventListener('click', () => {
-                document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
-                sprite.classList.add('active');
+                // Handle the "+" sprite separately
+                if (sprite.textContent.trim() === '+') {
+                    const newSpriteNum = document.querySelectorAll('.sprite').length;
+                    const newSprite = document.createElement('div');
+                    newSprite.className = 'sprite';
+                    newSprite.innerHTML = `<div>Sprite ${newSpriteNum}</div>`;
+                    sprite.parentNode.insertBefore(newSprite, sprite);
+                    
+                    // Add click event to the new sprite
+                    newSprite.addEventListener('click', () => {
+                        document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
+                        newSprite.classList.add('active');
+                    });
+                } else {
+                    document.querySelectorAll('.sprite').forEach(s => s.classList.remove('active'));
+                    sprite.classList.add('active');
+                }
             });
+        });
+        
+        // Menu button functionality
+        document.querySelectorAll('.menu button').forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.textContent.trim();
+                
+                if (action === 'Run ▶') {
+                    alert('Running your project!');
+                    animateSprite();
+                } else if (action === 'File') {
+                    const options = ['New Project', 'Save Project', 'Load Project', 'Export'];
+                    showDropdown(button, options);
+                } else if (action === 'Edit') {
+                    const options = ['Undo', 'Redo', 'Copy', 'Paste', 'Delete'];
+                    showDropdown(button, options);
+                } else if (action === 'Help') {
+                    const options = ['Documentation', 'Tutorials', 'About'];
+                    showDropdown(button, options);
+                }
+            });
+        });
+        
+        // Function to show dropdown menu
+        function showDropdown(button, options) {
+            // Remove any existing dropdowns
+            const existingDropdown = document.querySelector('.dropdown-menu');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            
+            // Create dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown-menu';
+            dropdown.style.position = 'absolute';
+            dropdown.style.backgroundColor = 'var(--sidebar-bg)';
+            dropdown.style.border = '1px solid var(--border-color)';
+            dropdown.style.borderRadius = '4px';
+            dropdown.style.padding = '5px 0';
+            dropdown.style.zIndex = '100';
+            
+            // Calculate position
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = `${rect.bottom}px`;
+            dropdown.style.left = `${rect.left}px`;
+            
+            // Add options
+            options.forEach(option => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = option;
+                item.style.padding = '8px 15px';
+                item.style.cursor = 'pointer';
+                
+                item.addEventListener('mouseover', () => {
+                    item.style.backgroundColor = 'var(--block-bg)';
+                });
+                
+                item.addEventListener('mouseout', () => {
+                    item.style.backgroundColor = '';
+                });
+                
+                item.addEventListener('click', () => {
+                    alert(`Selected: ${option}`);
+                    dropdown.remove();
+                });
+                
+                dropdown.appendChild(item);
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target) && e.target !== button) {
+                    dropdown.remove();
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+            
+            document.body.appendChild(dropdown);
+        }
+        
+        // Animate the active sprite
+        function animateSprite() {
+            const activeSprite = document.querySelector('.sprite.active');
+            if (activeSprite) {
+                // Simple animation effect
+                activeSprite.style.transition = 'transform 0.5s';
+                activeSprite.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    activeSprite.style.transform = 'scale(1)';
+                }, 500);
+            }
+        }
+        
+        // Drag and Drop functionality
+        let draggedBlock = null;
+        
+        // Make blocks in the sidebar draggable
+        document.querySelectorAll('.sidebar .block').forEach(block => {
+            block.setAttribute('draggable', 'true');
+            
+            block.addEventListener('dragstart', (e) => {
+                draggedBlock = block;
+                e.dataTransfer.setData('text/plain', block.textContent);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+        
+        // Make blocks in the workspace draggable and reorderable
+        document.querySelectorAll('.workspace .block').forEach(block => {
+            setupWorkspaceBlockDrag(block);
+        });
+        
+        function setupWorkspaceBlockDrag(block) {
+            block.setAttribute('draggable', 'true');
+            
+            block.addEventListener('dragstart', (e) => {
+                draggedBlock = block;
+                e.dataTransfer.setData('text/plain', block.textContent);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => {
+                    block.style.opacity = '0.4';
+                }, 0);
+            });
+            
+            block.addEventListener('dragend', () => {
+                block.style.opacity = '1';
+            });
+        }
+        
+        // Make the drop zone accept drops
+        const dropZone = document.querySelector('.drop-zone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = draggedBlock.parentNode.classList.contains('blocks') ? 'copy' : 'move';
+            dropZone.style.backgroundColor = '#383838';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '#282828';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#282828';
+            
+            if (draggedBlock.parentNode.classList.contains('blocks')) {
+                // Creating a new block from sidebar
+                const newBlock = document.createElement('div');
+                newBlock.className = draggedBlock.className;
+                newBlock.textContent = draggedBlock.textContent;
+                newBlock.style.marginBottom = '5px';
+                
+                // If we're dropping near another block, add appropriate indentation
+                const blockElements = Array.from(dropZone.querySelectorAll('.block'));
+                if (blockElements.length > 0) {
+                    // Check if it's a control block that should have indentation on next blocks
+                    const lastBlock = blockElements[blockElements.length - 1];
+                    if (lastBlock.classList.contains('control') || lastBlock.classList.contains('events')) {
+                        newBlock.style.marginLeft = '20px';
+                    }
+                }
+                
+                dropZone.appendChild(newBlock);
+                setupWorkspaceBlockDrag(newBlock);
+            } else if (draggedBlock.parentNode === dropZone) {
+                // Reordering existing blocks in the workspace
+                const y = e.clientY;
+                const blocks = Array.from(dropZone.querySelectorAll('.block'));
+                
+                // Remove the dragged block from the array
+                const index = blocks.indexOf(draggedBlock);
+                if (index !== -1) {
+                    blocks.splice(index, 1);
+                }
+                
+                // Find the block to insert before
+                let insertBeforeBlock = null;
+                for (let i = 0; i < blocks.length; i++) {
+                    const block = blocks[i];
+                    const rect = block.getBoundingClientRect();
+                    const blockMiddle = rect.top + rect.height / 2;
+                    
+                    if (y < blockMiddle) {
+                        insertBeforeBlock = block;
+                        break;
+                    }
+                }
+                
+                if (insertBeforeBlock) {
+                    dropZone.insertBefore(draggedBlock, insertBeforeBlock);
+                } else {
+                    dropZone.appendChild(draggedBlock);
+                }
+            }
         });
     </script>
 </body>
