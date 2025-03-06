@@ -5,10 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Better Ocelot IDE</title>
     <style>
-       
+        body {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "sidebar main-content"
+                "footer footer";
+            grid-template-rows: 50px 1fr 30px;
+            grid-template-columns: 200px 1fr;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            grid-area: header;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .main-content {
+            grid-area: main-content;
+            padding: 20px;
+        }
+
+        .footer {
+            grid-area: footer;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+        }
     </style>
 </head>
 <body>
-    
+    <div class="header">Header</div>
+    <div class="sidebar">Sidebar</div>
+    <div class="main-content">Main Content</div>
+    <div class="footer">Footer</div>
 </body>
 </html>

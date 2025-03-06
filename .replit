@@ -1,0 +1,15 @@
+modules = ["web"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Web Server"
+
+[[workflows.workflow]]
+name = "Web Server"
+author = 21148849
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "browser index.html"
