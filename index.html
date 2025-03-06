@@ -6,55 +6,81 @@
     <title>Better Ocelot IDE</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 1em;
-            text-align: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
         }
         .container {
             display: flex;
-            flex: 1;
+            justify-content: space-between;
+            width: 80%;
+            margin-top: 20px;
+        }
+        .canvas-container {
+            flex: 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc;
+        }
+        .canvas-container canvas {
+            width: 480px; /* Scratch canvas width */
+            height: 360px; /* Scratch canvas height */
         }
         .sidebar {
-            background-color: #f8f9fa;
-            width: 250px;
-            padding: 1em;
-            overflow-y: auto;
-        }
-        .main-content {
             flex: 1;
-            padding: 1em;
-            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #ccc;
+            padding: 10px;
         }
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 1em;
-            text-align: center;
+        .sprite-preview, .backdrop-preview, .sprite-properties {
+            margin-bottom: 20px;
+        }
+        .slider {
+            height: 100px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Better Ocelot IDE</h1>
-    </header>
+    <h1>Better Ocelot IDE</h1>
     <div class="container">
         <div class="sidebar">
-            <p></p>
+            <div class="sprite-preview">
+                <h2>Sprites Preview</h2>
+                <!-- Add sprite preview elements here -->
+            </div>
+            <div class="backdrop-preview">
+                <h2>Backdrop View</h2>
+                <!-- Add backdrop preview elements here -->
+            </div>
+            <div class="sprite-properties">
+                <h2>Selected Sprite Properties</h2>
+                <p>X: <input type="number" id="sprite-x" /></p>
+                <p>Y: <input type="number" id="sprite-y" /></p>
+                <p>Rotation: <input type="number" id="sprite-rotation" /></p>
+                <p>Rotation Mode: 
+                    <select id="sprite-rotation-mode">
+                        <option value="all-around">All Around</option>
+                        <option value="left-right">Left-Right</option>
+                        <option value="don't rotate">Don't Rotate</option>
+                    </select>
+                </p>
+                <p>Visibility: <input type="checkbox" id="sprite-visibility" /></p>
+                <p>Size: <input type="number" id="sprite-size" /></p>
+            </div>
         </div>
-        <div class="main">
-            <p></p>
+        <div class="canvas-container">
+            <canvas id="scratch-canvas"></canvas>
         </div>
     </div>
-    <footer>
-        <p>&copy; 2025 Better Ocelot IDE</p>
-    </footer>
+    <div class="slider">
+        <h2>Blocks</h2>
+        <!-- Add blocks slider elements here -->
+    </div>
 </body>
 </html>
